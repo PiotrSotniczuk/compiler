@@ -88,7 +88,7 @@ int yywrap(void)
 void yyerror(const char *str)
 {
   extern char *yytext;
-  fprintf(stderr,"error: line %d: %s at %s\n",
+  fprintf(stderr,"ERROR\nSyntax error: line %d: %s at %s\n",
     yy_mylinenumber, str, yytext);
 }
 
