@@ -4,7 +4,7 @@
 #include <string>
 #include "../bnfc/Parser.H"
 #include "../bnfc/Absyn.H"
-#include "../bnfc/Skeleton.H"
+#include "Front.h"
 #include <map>
 #include <filesystem>
 #include <cassert>
@@ -12,18 +12,18 @@
 namespace fs = std::filesystem;
 using namespace std;
 
-class MyVisitor : public Skeleton {
-    public:
-        void compile(Program *p){
-            p->accept(this);
-        }
+// class MyVisitor : public Skeleton {
+//     public:
+//         void compile(Program *p){
+//             p->accept(this);
+//         }
 
-    private:        
-        void visitNoInit(NoInit *no_init){
-            cout << "No initi\n";
-            visitIdent(no_init->ident_);
-        }
-};
+//     private:        
+//         void visitNoInit(NoInit *no_init){
+//             cout << "No initi\n";
+//             visitIdent(no_init->ident_);
+//         }
+// };
 
 
 int main(int argc, char **argv)
