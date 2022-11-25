@@ -14,7 +14,7 @@ latc_x86: ${BNFC_FILES} ${LATCO} ${FRONTO}
 ${LATCO} : src/Latte.cpp bnfc/Parser.H bnfc/Absyn.H bnfc/Skeleton.H src/Front.h
 	${CC} ${CCFLAGS} -c src/Latte.cpp -o ${LATCO}
 
-${FRONTO}: bnfc/Skeleton.H
+${FRONTO}: bnfc/Skeleton.H src/Front.cpp
 	${CC} ${CCFLAGS} -c src/Front.cpp -o ${FRONTO}
 
 clean : 

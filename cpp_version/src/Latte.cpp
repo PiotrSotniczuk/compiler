@@ -1,29 +1,10 @@
 #include <iostream>
-#include <string.h>
 #include <fstream>
-#include <string>
 #include "../bnfc/Parser.H"
 #include "../bnfc/Absyn.H"
 #include "Front.h"
-#include <map>
-#include <filesystem>
-#include <cassert>
 
-namespace fs = std::filesystem;
 using namespace std;
-
-// class MyVisitor : public Skeleton {
-//     public:
-//         void compile(Program *p){
-//             p->accept(this);
-//         }
-
-//     private:        
-//         void visitNoInit(NoInit *no_init){
-//             cout << "No initi\n";
-//             visitIdent(no_init->ident_);
-//         }
-// };
 
 
 int main(int argc, char **argv)
@@ -45,11 +26,10 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-    cerr << "OK\n";
-
 	MyVisitor *myV = new MyVisitor();
-
     myV->compile(parse_tree);
+
+	cerr << "OK\n";
 
 	return 0;
 }
