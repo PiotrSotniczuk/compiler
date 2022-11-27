@@ -28,11 +28,8 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	MyVisitor *myV = new MyVisitor();
-    myV->compile(parse_tree);
-
 	FindDef *fdef = new FindDef();
-	fdef->look(parse_tree);
+	fdef->run(parse_tree);
 
 	auto main_fun = fdef->funs.find("main");
 	if(main_fun == fdef->funs.end()){
@@ -46,16 +43,12 @@ int main(int argc, char **argv)
 	if(main_fun->second.second.size() > 0){
 		go_error(fdef->main_line, "'main' function shouldn't have arguments");
 	}
-	
-	// for (auto const& [key, val] : fdef->funs)
-	// {
-    // 	std::cout << key << " "<< val.first << ":";
-	// 	for (auto const& s : val.second){
-	// 		cout << s <<",";
-	// 	}
-	// 	cout<<"\n";
 
-	// }
+	TypeChecker *myV = new TypeChecker(fdef->funs);
+    myV->run(parse_tree);
+	
+
+	
 
 
 	cerr << "OK\n";

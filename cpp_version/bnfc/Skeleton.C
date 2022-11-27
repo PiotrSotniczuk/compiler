@@ -20,6 +20,10 @@ void Skeleton::visitAddOp(AddOp *t) {} //abstract class
 void Skeleton::visitMulOp(MulOp *t) {} //abstract class
 void Skeleton::visitRelOp(RelOp *t) {} //abstract class
 
+void Skeleton::run(Program *p){
+    p->accept(this);
+}
+
 void Skeleton::visitProg(Prog *prog)
 {
   /* Code For Prog Goes Here */
@@ -173,41 +177,44 @@ void Skeleton::visitInit(Init *init)
 
 }
 
-void Skeleton::visitInt(Int *int_)
+void Skeleton::visitInt(__attribute__((unused)) Int *int_)
 {
-  /* Code For Int Goes Here */
-
-
+  this->last_type = "int";
 }
 
-void Skeleton::visitStr(Str *str)
+void Skeleton::visitStr(__attribute__((unused)) Str *str)
 {
-  /* Code For Str Goes Here */
-
-
+  this->last_type = "string";
 }
 
-void Skeleton::visitBool(Bool *bool_)
+void Skeleton::visitBool(__attribute__((unused)) Bool *bool_)
 {
-  /* Code For Bool Goes Here */
-
-
+  this->last_type = "bool";
 }
 
-void Skeleton::visitVoid(Void *void_)
+void Skeleton::visitVoid(__attribute__((unused)) Void *void_)
 {
-  /* Code For Void Goes Here */
-
-
+  this->last_type = "void";
 }
 
 void Skeleton::visitFun(Fun *fun)
 {
-  /* Code For Fun Goes Here */
-
   fun->type_->accept(this);
+  std::string ret_type = this->last_type;
   fun->listtype_->accept(this);
+  this->last_type = ret_type + " " + this->last_type;
+}
 
+void Skeleton::visitListType(ListType *list_type)
+{
+    std::string all = "(";
+  for (ListType::iterator i = list_type->begin() ; i != list_type->end() ; ++i)
+  {
+    (*i)->accept(this);
+    all += this->last_type + ",";
+  }
+  all.pop_back();
+  this->last_type = all + ")";
 }
 
 void Skeleton::visitEVar(EVar *e_var)
@@ -426,14 +433,6 @@ void Skeleton::visitListStmt(ListStmt *list_stmt)
 void Skeleton::visitListItem(ListItem *list_item)
 {
   for (ListItem::iterator i = list_item->begin() ; i != list_item->end() ; ++i)
-  {
-    (*i)->accept(this);
-  }
-}
-
-void Skeleton::visitListType(ListType *list_type)
-{
-  for (ListType::iterator i = list_type->begin() ; i != list_type->end() ; ++i)
   {
     (*i)->accept(this);
   }

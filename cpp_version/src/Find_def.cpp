@@ -10,7 +10,7 @@ void FindDef::visitFnDef(FnDef *fn_def)
     string ret_type = this->last_type;
   visitIdent(fn_def->ident_);
   if(fn_def->ident_ == "main"){
-    this->main_line = fn_def->line_number;
+    this->main_line = fn_def->type_->line_number;
   }
   this->arg_types.clear();
   fn_def->listarg_->accept(this);
@@ -37,48 +37,4 @@ void FindDef::visitAr(Ar *ar)
 	  go_error(ar->line_number, "Multiple arguments with name \"" + ar->ident_ + "\" in function declaration");
   }
   this->fun_args.emplace(ar->ident_);
-}
-
-void FindDef::visitInt(__attribute__((unused)) Int *int_)
-{
-  this->last_type = "int";
-}
-
-void FindDef::visitStr(__attribute__((unused)) Str *str)
-{
-  this->last_type = "string";
-}
-
-void FindDef::visitBool(__attribute__((unused)) Bool *bool_)
-{
-  this->last_type = "bool";
-}
-
-void FindDef::visitVoid(__attribute__((unused)) Void *void_)
-{
-  this->last_type = "void";
-}
-
-void FindDef::visitFun(Fun *fun)
-{
-  fun->type_->accept(this);
-  string ret_type = this->last_type;
-  fun->listtype_->accept(this);
-  this->last_type = ret_type + " " + this->last_type;
-}
-
-void FindDef::visitListType(ListType *list_type)
-{
-    string all = "(";
-  for (ListType::iterator i = list_type->begin() ; i != list_type->end() ; ++i)
-  {
-    (*i)->accept(this);
-    all += this->last_type + ",";
-  }
-  all.pop_back();
-  this->last_type = all + ")";
-}
-
-void FindDef::look(Program *p){
-    p->accept(this);
 }

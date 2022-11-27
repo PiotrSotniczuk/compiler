@@ -79,6 +79,9 @@ public:
   void visitString(String x);
   void visitIdent(Ident x);
 
+  std::string last_type;
+  void run(Program *p);
+
 };
 
 

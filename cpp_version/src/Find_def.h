@@ -24,20 +24,12 @@ class FindDef : public Skeleton {
             fun_args = set<string>();
             main_line = 0;
         };
-        void look(Program *p);
     private:
         vector<string> arg_types;
-        string last_type;
         set<string> fun_args;
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitListArg(ListArg *list_arg);
         virtual void visitAr(Ar *ar);
-        virtual void visitInt(Int *int_);
-        virtual void visitStr(Str *str_);
-        virtual void visitVoid(Void *void_);
-        virtual void visitBool(Bool *bool_);
-        virtual void visitFun(Fun *fun);
-        virtual void visitListType(ListType *list_type);
 };
 
 #endif
