@@ -3,6 +3,8 @@
 #include "../bnfc/Parser.H"
 #include "../bnfc/Absyn.H"
 #include "Front.h"
+#include "Find_def.h"
+#include "Shared.h"
 
 using namespace std;
 
@@ -28,6 +30,33 @@ int main(int argc, char **argv)
 
 	MyVisitor *myV = new MyVisitor();
     myV->compile(parse_tree);
+
+	FindDef *fdef = new FindDef();
+	fdef->look(parse_tree);
+
+	auto main_fun = fdef->funs.find("main");
+	if(main_fun == fdef->funs.end()){
+		go_error(0, "There is no 'main' function");
+	}
+
+	if(main_fun->second.first != "int"){
+		go_error(fdef->main_line, "'main' function doesn't return 'int'");
+	}
+
+	if(main_fun->second.second.size() > 0){
+		go_error(fdef->main_line, "'main' function shouldn't have arguments");
+	}
+	
+	// for (auto const& [key, val] : fdef->funs)
+	// {
+    // 	std::cout << key << " "<< val.first << ":";
+	// 	for (auto const& s : val.second){
+	// 		cout << s <<",";
+	// 	}
+	// 	cout<<"\n";
+
+	// }
+
 
 	cerr << "OK\n";
 

@@ -1,13 +1,9 @@
 #include "../bnfc/Skeleton.H"
 #include <iostream>
 #include "Front.h"
+#include "Shared.h"
 
 using namespace std;
-
-void go_error(int line, string msg){
-	cerr << "ERROR\nline: " << to_string(line) << "\n" <<  msg << "\n";
-	exit(1);
-}
 
 void MyVisitor::compile(Program *p){
     p->accept(this);
@@ -24,15 +20,15 @@ void MyVisitor::compile(Program *p){
 
 // }
 
-void MyVisitor::visitAr(Ar *ar)
-{
-  ar->type_->accept(this);
-  visitIdent(ar->ident_);
-  if(this->fun_args.count(ar->ident_) > 0){
-	go_error(ar->line_number, "Multiple arguments with name \"" + ar->ident_ + "\" in function declaration");
-  }
-  this->fun_args.emplace(ar->ident_);
-}
+// void MyVisitor::visitAr(Ar *ar)
+// {
+//   ar->type_->accept(this);
+//   visitIdent(ar->ident_);
+//   if(this->fun_args.count(ar->ident_) > 0){
+// 	go_error(ar->line_number, "Multiple arguments with name \"" + ar->ident_ + "\" in function declaration");
+//   }
+//   this->fun_args.emplace(ar->ident_);
+// }
 
 // void MyVisitor::visitBlk(Blk *blk)
 // {
@@ -393,12 +389,12 @@ void MyVisitor::visitAr(Ar *ar)
 //   }
 // }
 
-void MyVisitor::visitListArg(ListArg *list_arg){
-	this->fun_args.clear();
-	for (ListArg::iterator i = list_arg->begin() ; i != list_arg->end() ; ++i){
-		(*i)->accept(this);
-	}
-}
+// void MyVisitor::visitListArg(ListArg *list_arg){
+// 	this->fun_args.clear();
+// 	for (ListArg::iterator i = list_arg->begin() ; i != list_arg->end() ; ++i){
+// 		(*i)->accept(this);
+// 	}
+// }
 
 // void MyVisitor::visitListStmt(ListStmt *list_stmt)
 // {
