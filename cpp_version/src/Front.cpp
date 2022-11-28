@@ -9,8 +9,12 @@ void TypeChecker::visitBlk(Blk *blk)
 {
   this->vars.push_front(map<string, string>());
   blk->liststmt_->accept(this);
-  
   this->vars.pop_front();
+}
+
+void TypeChecker::visitBlkFun(Blk *blk)
+{
+  blk->liststmt_->accept(this);
 }
 
 void TypeChecker::visitListItem(ListItem *list_item)
@@ -85,7 +89,17 @@ void TypeChecker::visitFnDef(FnDef *fn_def)
   this->act_fun_type = this->last_type;
   visitIdent(fn_def->ident_);
   fn_def->listarg_->accept(this);
-  fn_def->block_->accept(this);
+
+  Blk* blk = dynamic_cast<Blk*>(fn_def->block_);
+  this->vars.push_front(map<string, string>());
+
+  for (Arg* arg: *(fn_def->listarg_)){
+    Ar* ar = dynamic_cast<Ar*>(arg);
+    ar->type_->accept(this);
+    this->vars.begin()->emplace(make_pair(ar->ident_, this->last_type));
+  }
+  visitBlkFun(blk);
+  this->vars.pop_front();
 }
 
 void TypeChecker::visitRet(Ret *ret)
@@ -165,6 +179,12 @@ void TypeChecker::visitListExpr(ListExpr *list_expr, vector<string> args, int li
     go_error(line, "Number of arguments does not match number of arguments in declaration.");
   }
   if(args != argsExpr){
+    for (string str: args){
+      cout << str;
+    }
+    for (string str: argsExpr){
+      cout << str;
+    }
     go_error(line, "Some arguments types are not matching with function declaration.");
   }
 }
@@ -177,7 +197,7 @@ void TypeChecker::visitEApp(EApp *e_app)
     go_error(e_app->line_number, "This function is not declared.");
   }
   this->visitListExpr(e_app->listexpr_, it->second.second, e_app->line_number);
-  this->expr_type = it->first;
+  this->expr_type = it->second.first;
 }
 
 void TypeChecker::visitEString(EString *e_string)
@@ -255,7 +275,7 @@ void TypeChecker::visitERel(ERel *e_rel)
     }
   }
 
-  this->expr_type = type1;
+  this->expr_type = "boolean";
 }
 
 void TypeChecker::visitEAnd(EAnd *e_and)

@@ -23,6 +23,7 @@ class TypeChecker : public Skeleton {
         string act_fun_type;
         string getVarType(string var, int line_number);
         virtual void visitBlk(Blk *blk);
+        virtual void visitBlkFun(Blk *blk);
         virtual void visitListItem(ListItem *list_item);
         virtual void visitNoInit(NoInit *no_init);
         virtual void visitInit(Init *init);
