@@ -179,12 +179,6 @@ void TypeChecker::visitListExpr(ListExpr *list_expr, vector<string> args, int li
     go_error(line, "Number of arguments does not match number of arguments in declaration.");
   }
   if(args != argsExpr){
-    for (string str: args){
-      cout << str;
-    }
-    for (string str: argsExpr){
-      cout << str;
-    }
     go_error(line, "Some arguments types are not matching with function declaration.");
   }
 }

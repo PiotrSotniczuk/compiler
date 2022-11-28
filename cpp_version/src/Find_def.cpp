@@ -38,3 +38,59 @@ void FindDef::visitAr(Ar *ar)
   }
   this->fun_args.emplace(ar->ident_);
 }
+
+void CheckReturn::visitFnDef(FnDef *fn_def)
+{
+  this->there_is_return = false;
+  fn_def->type_->accept(this);
+  if(this->last_type != "void"){
+    fn_def->block_->accept(this);
+    if(!this->there_is_return){
+      go_error(fn_def->line_number, "There is a missing return in function " + fn_def->ident_);
+    }
+  }
+}
+
+void CheckReturn::visitListStmt(ListStmt *list_stmt)
+{
+  for (ListStmt::iterator i = list_stmt->begin() ; i != list_stmt->end() ; ++i)
+  {
+    (*i)->accept(this);
+    if(this->there_is_return){
+      break;
+    }
+  }
+}
+
+void CheckReturn::visitRet(Ret *ret)
+{
+  this->there_is_return = true;
+}
+
+void CheckReturn::visitCond(Cond *cond)
+{
+  
+  ELitTrue* blk = dynamic_cast<ELitTrue*>(cond->expr_);
+  if(blk != NULL){
+    cond->stmt_->accept(this);
+  }
+}
+
+void CheckReturn::visitCondElse(CondElse *cond_else)
+{
+  ELitTrue* tr = dynamic_cast<ELitTrue*>(cond_else->expr_);
+  if(tr){
+    cond_else->stmt_1->accept(this);
+    return;
+  }
+  ELitFalse* fl = dynamic_cast<ELitFalse*>(cond_else->expr_);
+  if(fl){
+    cond_else->stmt_2->accept(this);
+    return;
+  }
+  cond_else->stmt_1->accept(this);
+  bool ret1 = this->there_is_return;
+  cond_else->stmt_2->accept(this);
+  bool ret2 = this->there_is_return;
+  this->there_is_return = ret1 && ret2;
+}

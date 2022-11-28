@@ -46,6 +46,9 @@ int main(int argc, char **argv)
 
 	TypeChecker *myV = new TypeChecker(fdef->funs);
     myV->run(parse_tree);
+
+	CheckReturn *ret = new CheckReturn();
+	ret->run(parse_tree);
 	
 
 	

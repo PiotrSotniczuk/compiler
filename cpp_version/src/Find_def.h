@@ -32,4 +32,16 @@ class FindDef : public Skeleton {
         virtual void visitAr(Ar *ar);
 };
 
+class CheckReturn : public Skeleton {
+    public:
+        
+    private:
+        bool there_is_return;
+        virtual void visitFnDef(FnDef *fn_def);
+        virtual void visitListStmt(ListStmt *list_stmt);
+        virtual void visitRet(Ret *ret);
+        virtual void visitCond(Cond *cond);
+        virtual void visitCondElse(CondElse *cond_else); 
+};
+
 #endif
