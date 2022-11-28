@@ -1,25 +1,19 @@
-COPY FROM INSTANT TO BE UPDATED
-
 Projekt jest napisany w C++, ale w standardzie C++17!
 
 SRC
-W folderze src znajdują się pliki w których jest cała logika działania obu kompilatorów LLVM oraz JVM.
+W folderze src znajdują się pliki w których jest wiekszość logiki działania kompilatora.
 W kodzie używam elementów z folderu bnfc, używam głównie Parsera do stworzenia drzewa programu oraz
 klasy Visitor do poruszania się po tym drzewie.
 
 BNFC
-Całą zawartość folderu bnfc (oprócz pliku Instant.cf) można otrzymać wykonując w nim polecenie 'bnfc --cpp -m Instant.cf'.
+Większość zawartości folderu bnfc można otrzymać wykonując w nim polecenie 'bnfc --cpp -m Instant.cf'.
 Program bnfc (https://hackage.haskell.org/package/BNFC) nie jest zainstalowany na students,
-więc postanowiłem załączyć pliki wygenerowane lokalnie.
-Cały folder bnfc przed wykonaniem 'make' zajmuje 130kB, więc nie ma tragedii, uznałem to rozwiązanie za pewniejsze i prostsze niż
-instalowanie bnfc na students.
-
-LIB
-Zawiera plik jasmin.jar z laboratorium używany do kompilowania plików *.j na pliki *.class .
+więc postanowiłem załączyć pliki wygenerowane lokalnie. 
+Dokonałem również małych zmian, w pliku Skeleton.C dla własnej wygody.
 
 MAKE
 Komenda 'make' najpierw tworzy pliki *.o w bibliotece w folderze bnfc, a następnie tworzy pliki *.o w folderze głównym.
-Na koniec używając wygenerowanych plików *.o kompiluje pliki insc_llvm oraz insc_jvm.
+Na koniec używając wygenerowanych plików *.o kompiluje plik wykonywalny latc_x86.
 
 MAKE CLEAN
 Komenda 'make clean' usuwa wszystkie pliki wygenerowane przez komende make.
