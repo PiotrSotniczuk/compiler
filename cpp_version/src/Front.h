@@ -21,7 +21,7 @@ class TypeChecker : public Skeleton {
         string last_ident;
         string expr_type;
         string act_fun_type;
-        string getVarType(string);
+        string getVarType(string var, int line_number);
         virtual void visitBlk(Blk *blk);
         virtual void visitListItem(ListItem *list_item);
         virtual void visitNoInit(NoInit *no_init);
@@ -34,9 +34,31 @@ class TypeChecker : public Skeleton {
         virtual void visitCond(Cond *cond);
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_);
-        // virtual void ;
-        // virtual void ;
-
+        virtual void visitEVar(EVar *p);
+        virtual void visitELitInt(ELitInt *p);
+        virtual void visitELitTrue(ELitTrue *p);
+        virtual void visitELitFalse(ELitFalse *p);
+        virtual void visitListExpr(ListExpr *list_expr, vector<string> args, int line);
+        virtual void visitEApp(EApp *p);
+        virtual void visitEString(EString *p);
+        virtual void visitNeg(Neg *p);
+        virtual void visitNot(Not *p);
+        virtual void visitEMul(EMul *p);
+        virtual void visitEAdd(EAdd *p);
+        virtual void visitERel(ERel *p);
+        virtual void visitEAnd(EAnd *p);
+        virtual void visitEOr(EOr *p);
+        virtual void visitPlus(Plus *p);
+        virtual void visitMinus(Minus *p);
+        virtual void visitTimes(Times *p);
+        virtual void visitDiv(Div *p);
+        virtual void visitMod(Mod *p);
+        virtual void visitLTH(LTH *p);
+        virtual void visitLE(LE *p);
+        virtual void visitGTH(GTH *p);
+        virtual void visitGE(GE *p);
+        virtual void visitEQU(EQU *p);
+        virtual void visitNE(NE *p);
 };
 
 #endif
