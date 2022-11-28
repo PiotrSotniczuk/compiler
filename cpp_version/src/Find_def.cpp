@@ -62,16 +62,15 @@ void CheckReturn::visitListStmt(ListStmt *list_stmt)
   }
 }
 
-void CheckReturn::visitRet(Ret *ret)
+void CheckReturn::visitRet(__attribute__((unused)) Ret *ret)
 {
   this->there_is_return = true;
 }
 
 void CheckReturn::visitCond(Cond *cond)
 {
-  
-  ELitTrue* blk = dynamic_cast<ELitTrue*>(cond->expr_);
-  if(blk != NULL){
+  ELitTrue* tr = dynamic_cast<ELitTrue*>(cond->expr_);
+  if(tr){
     cond->stmt_->accept(this);
   }
 }
@@ -90,7 +89,17 @@ void CheckReturn::visitCondElse(CondElse *cond_else)
   }
   cond_else->stmt_1->accept(this);
   bool ret1 = this->there_is_return;
+
+  this->there_is_return = false;
   cond_else->stmt_2->accept(this);
   bool ret2 = this->there_is_return;
   this->there_is_return = ret1 && ret2;
+}
+
+void CheckReturn::visitWhile(While *while_)
+{
+  ELitTrue* tr = dynamic_cast<ELitTrue*>(while_->expr_);
+  if(tr){
+    while_->stmt_->accept(this);
+  }
 }

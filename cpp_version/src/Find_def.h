@@ -41,7 +41,8 @@ class CheckReturn : public Skeleton {
         virtual void visitListStmt(ListStmt *list_stmt);
         virtual void visitRet(Ret *ret);
         virtual void visitCond(Cond *cond);
-        virtual void visitCondElse(CondElse *cond_else); 
+        virtual void visitCondElse(CondElse *cond_else);
+        virtual void visitWhile(While *while_); 
 };
 
 #endif
