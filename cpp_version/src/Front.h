@@ -31,6 +31,7 @@ class TypeChecker : public Skeleton {
         virtual void visitDecr(Decr *decr);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *ret);
+        virtual void visitVRet(VRet *v_ret);
         virtual void visitCond(Cond *cond);
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_);
@@ -48,17 +49,6 @@ class TypeChecker : public Skeleton {
         virtual void visitERel(ERel *p);
         virtual void visitEAnd(EAnd *p);
         virtual void visitEOr(EOr *p);
-        virtual void visitPlus(Plus *p);
-        virtual void visitMinus(Minus *p);
-        virtual void visitTimes(Times *p);
-        virtual void visitDiv(Div *p);
-        virtual void visitMod(Mod *p);
-        virtual void visitLTH(LTH *p);
-        virtual void visitLE(LE *p);
-        virtual void visitGTH(GTH *p);
-        virtual void visitGE(GE *p);
-        virtual void visitEQU(EQU *p);
-        virtual void visitNE(NE *p);
 };
 
 #endif

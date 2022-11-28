@@ -19,7 +19,9 @@ void TypeChecker::visitListItem(ListItem *list_item)
   for (ListItem::iterator i = list_item->begin() ; i != list_item->end() ; ++i)
   {
     (*i)->accept(this);
-    this->vars.begin()->emplace(make_pair(this->last_ident, dec_type));
+    if(!this->vars.begin()->emplace(make_pair(this->last_ident, dec_type)).second){
+      go_error((*i)->line_number, "This var was already declared in this scope.");
+    }
   }
 }
 
@@ -48,6 +50,7 @@ string TypeChecker::getVarType(string var, int line_number){
     }
   }
   go_error(line_number, "This var was never declared");
+  return "";
 }
 
 void TypeChecker::visitAss(Ass *ass)
@@ -93,6 +96,13 @@ void TypeChecker::visitRet(Ret *ret)
   }
 }
 
+void TypeChecker::visitVRet(VRet *v_ret)
+{
+  if(this->act_fun_type != "void"){
+    go_error(v_ret->line_number, "Return type does not match function type.");
+  }
+}
+
 void TypeChecker::visitCond(Cond *cond)
 {
   cond->expr_->accept(this);
@@ -133,12 +143,12 @@ void TypeChecker::visitELitInt(ELitInt *e_lit_int)
   this->expr_type = "int";
 }
 
-void TypeChecker::visitELitTrue(ELitTrue *e_lit_true)
+void TypeChecker::visitELitTrue(__attribute__((unused)) ELitTrue *e_lit_true)
 {
   this->expr_type = "boolean";
 }
 
-void TypeChecker::visitELitFalse(ELitFalse *e_lit_false)
+void TypeChecker::visitELitFalse(__attribute__((unused)) ELitFalse *e_lit_false)
 {
   this->expr_type = "boolean";
 }
@@ -179,106 +189,95 @@ void TypeChecker::visitEString(EString *e_string)
 void TypeChecker::visitNeg(Neg *neg)
 {
   neg->expr_->accept(this);
-  if(this->expr_type != "boolean"){
-    
+  if(this->expr_type != "int"){
+    go_error(neg->line_number, "Expression is not 'int'.");
   }
+  this->expr_type = "int";
 }
 
 void TypeChecker::visitNot(Not *not_)
 {
   not_->expr_->accept(this);
-
+  if(this->expr_type != "boolean"){
+    go_error(not_->line_number, "Expression is not 'boolean'.");
+  }
+  this->expr_type = "boolean";
 }
 
 void TypeChecker::visitEMul(EMul *e_mul)
 {
   e_mul->expr_1->accept(this);
+  if(this->expr_type != "int"){
+    go_error(e_mul->line_number, "Expression is not 'int'.");
+  }
   e_mul->mulop_->accept(this);
   e_mul->expr_2->accept(this);
-
+  if(this->expr_type != "int"){
+    go_error(e_mul->line_number, "Expression is not 'int'.");
+  }
+  this->expr_type = "int";
 }
 
 void TypeChecker::visitEAdd(EAdd *e_add)
 {
   e_add->expr_1->accept(this);
+  string type1 = this->expr_type;
   e_add->addop_->accept(this);
   e_add->expr_2->accept(this);
+  string type2 = this->expr_type;
 
+  if(type1 != type2){
+    go_error(e_add->line_number, "Types does not match.");
+  }
+
+  if(type1 != "string" && type1 != "int"){
+    go_error(e_add->line_number, "Types for addition are not 'int' or 'string'.");
+  }
+  this->expr_type = type1;
 }
 
 void TypeChecker::visitERel(ERel *e_rel)
 {
   e_rel->expr_1->accept(this);
+  string type1 = this->expr_type;
   e_rel->relop_->accept(this);
   e_rel->expr_2->accept(this);
+  string type2 = this->expr_type;
+  if(type1 != type2){
+    go_error(e_rel->line_number, "Types does not match.");
+  }
+  EQU* equ = dynamic_cast<EQU*>(e_rel->relop_);
+  NE* ne = dynamic_cast<NE*>(e_rel->relop_);
 
+  if(equ == NULL && ne == NULL){
+    if(type1 != "int"){
+      go_error(e_rel->line_number, "This operator works only with 'int'.");
+    }
+  }
+
+  this->expr_type = type1;
 }
 
 void TypeChecker::visitEAnd(EAnd *e_and)
 {
   e_and->expr_1->accept(this);
+  if(this->expr_type != "boolean"){
+    go_error(e_and->line_number, "Expression is not 'boolean'.");
+  }
   e_and->expr_2->accept(this);
-
+  if(this->expr_type != "boolean"){
+    go_error(e_and->line_number, "Expression is not 'boolean'.");
+  }
 }
 
 void TypeChecker::visitEOr(EOr *e_or)
 {
   e_or->expr_1->accept(this);
+  if(this->expr_type != "boolean"){
+    go_error(e_or->line_number, "Expression is not 'boolean'.");
+  }
   e_or->expr_2->accept(this);
-
-}
-
-void TypeChecker::visitPlus(Plus *plus)
-{
-  
-}
-
-void TypeChecker::visitMinus(Minus *minus)
-{
-  
-}
-
-void TypeChecker::visitTimes(Times *times)
-{
-  
-}
-
-void TypeChecker::visitDiv(Div *div)
-{
-  
-}
-
-void TypeChecker::visitMod(Mod *mod)
-{
-  
-}
-
-void TypeChecker::visitLTH(LTH *lth)
-{
-  
-}
-
-void TypeChecker::visitLE(LE *le)
-{
-  
-}
-
-void TypeChecker::visitGTH(GTH *gth)
-{
-  
-}
-
-void TypeChecker::visitGE(GE *ge)
-{
-  
-}
-
-void TypeChecker::visitEQU(EQU *equ)
-{
-  
-}
-
-void TypeChecker::visitNE(NE *ne)
-{
-  
+  if(this->expr_type != "boolean"){
+    go_error(e_or->line_number, "Expression is not 'boolean'.");
+  }
 }
