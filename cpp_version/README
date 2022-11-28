@@ -13,7 +13,7 @@ Dokonałem również małych zmian, w pliku Skeleton.C dla własnej wygody.
 
 MAKE
 Komenda 'make' najpierw tworzy pliki *.o w bibliotece w folderze bnfc, a następnie tworzy pliki *.o w folderze głównym.
-Na koniec używając wygenerowanych plików *.o kompiluje plik wykonywalny latc_x86.
+Na koniec używając wygenerowanych plików *.o kompiluje się plik wykonywalny latc, który odpowiada za frontend.
 
 MAKE CLEAN
 Komenda 'make clean' usuwa wszystkie pliki wygenerowane przez komende make.
