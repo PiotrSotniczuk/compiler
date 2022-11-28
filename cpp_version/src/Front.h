@@ -19,10 +19,23 @@ class TypeChecker : public Skeleton {
         
         map<string, pair<string, vector<string>>> funs;
         string last_ident;
+        string expr_type;
+        string act_fun_type;
+        string getVarType(string);
         virtual void visitBlk(Blk *blk);
         virtual void visitListItem(ListItem *list_item);
         virtual void visitNoInit(NoInit *no_init);
         virtual void visitInit(Init *init);
+        virtual void visitAss(Ass *ass);
+        virtual void visitIncr(Incr *incr);
+        virtual void visitDecr(Decr *decr);
+        virtual void visitFnDef(FnDef *fn_def);
+        virtual void visitRet(Ret *ret);
+        virtual void visitCond(Cond *cond);
+        virtual void visitCondElse(CondElse *cond_else);
+        virtual void visitWhile(While *while_);
+        // virtual void ;
+        // virtual void ;
 
 };
 
