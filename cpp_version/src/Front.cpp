@@ -120,6 +120,12 @@ void TypeChecker::visitVRet(VRet *v_ret)
 void TypeChecker::visitCond(Cond *cond)
 {
   cond->expr_->accept(this);
+
+  Decl* decl = dynamic_cast<Decl*>(cond->stmt_);
+  if(decl){
+    go_error(cond->line_number, "Declaration can't be only statment in if.");
+  }
+
   if(this->expr_type != "boolean"){
     go_error(cond->line_number, "Expresion in condition should be of type boolean.");
   }
@@ -132,6 +138,11 @@ void TypeChecker::visitCondElse(CondElse *cond_else)
   if(this->expr_type != "boolean"){
     go_error(cond_else->line_number, "Expresion in condition should be of type boolean.");
   }
+  Decl* decl1 = dynamic_cast<Decl*>(cond_else->stmt_1);
+  Decl* decl2 = dynamic_cast<Decl*>(cond_else->stmt_2);
+  if(decl1 || decl2){
+    go_error(cond_else->line_number, "Declaration can't be only statment in if.");
+  }
   cond_else->stmt_1->accept(this);
   cond_else->stmt_2->accept(this);
 }
@@ -141,6 +152,10 @@ void TypeChecker::visitWhile(While *while_)
   while_->expr_->accept(this);
   if(this->expr_type != "boolean"){
     go_error(while_->line_number, "Expresion in condition should be of type boolean.");
+  }
+  Decl* decl = dynamic_cast<Decl*>(while_->stmt_);
+  if(decl){
+    go_error(while_->line_number, "Declaration can't be only statment in while.");
   }
   while_->stmt_->accept(this);
 }
