@@ -50,6 +50,7 @@ class TypeChecker : public Skeleton {
         virtual void visitERel(ERel *p);
         virtual void visitEAnd(EAnd *p);
         virtual void visitEOr(EOr *p);
+        virtual void visitDecl(Decl *decl);
 };
 
 #endif

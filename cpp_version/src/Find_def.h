@@ -43,6 +43,7 @@ class CheckReturn : public Skeleton {
         virtual void visitCond(Cond *cond);
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_); 
+        virtual void visitEApp(EApp *e_app);
 };
 
 #endif

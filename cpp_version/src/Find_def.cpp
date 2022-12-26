@@ -31,6 +31,9 @@ void FindDef::visitListArg(ListArg *list_arg){
 void FindDef::visitAr(Ar *ar)
 {
   ar->type_->accept(this);
+  if (this->last_type == "void"){
+    go_error(ar->line_number, "Arguments in function declaration cannot be of type void");
+  }
   this->arg_types.push_back(this->last_type);
   visitIdent(ar->ident_);
   if(this->fun_args.count(ar->ident_) > 0){
@@ -65,6 +68,15 @@ void CheckReturn::visitListStmt(ListStmt *list_stmt)
 void CheckReturn::visitRet(__attribute__((unused)) Ret *ret)
 {
   this->there_is_return = true;
+}
+
+void CheckReturn::visitEApp(EApp *e_app)
+{
+  visitIdent(e_app->ident_);
+  if (e_app->ident_ == "error"){
+    this->there_is_return = true;
+  }
+  e_app->listexpr_->accept(this);
 }
 
 void CheckReturn::visitCond(Cond *cond)

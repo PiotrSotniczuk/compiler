@@ -29,6 +29,15 @@ void TypeChecker::visitListItem(ListItem *list_item)
   }
 }
 
+void TypeChecker::visitDecl(Decl *decl)
+{
+  decl->type_->accept(this);
+  if (this->last_type == "void"){
+    go_error(decl->line_number, "You should not declare variables of type void");
+  }
+  decl->listitem_->accept(this);
+}
+
 void TypeChecker::visitNoInit(NoInit *no_init)
 {
   visitIdent(no_init->ident_);
