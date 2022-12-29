@@ -7,16 +7,17 @@ TYPE_CHECKER=Type_checker.o
 FIND_DEF=Find_def.o
 SHARED=Shared.o
 FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED} ${LATC_O}
+BACK_LIBS=${BNFC_FILES}
 
-all: latc latc_x86
+all: latc latc_x86_64
 
 latc: ${BNFC_FILES} ${FRONT_LIBS}
 	@echo "Compiling LatteFront..."
 	${CC} ${CCFLAGS} ${BNFC_FILES} ${FRONT_LIBS} -o latc
 
-latc_x86: lib/runtime.o src/back/Compiler.cpp
+latc_x86_64: lib/runtime.o src/back/Compiler.cpp
 	@echo "Compiling LatteBack..."
-	${cc} ${CCFLAGS} src/back/Compiler.cpp -o latc_x86
+	${CC} ${CCFLAGS} ${BACK_LIBS} src/back/Compiler.cpp -o latc_x86_64
 
 ${LATC_O} : src/front/Latte.cpp
 	${CC} ${CCFLAGS} -c src/front/Latte.cpp -o ${LATC_O}
@@ -30,8 +31,8 @@ ${FIND_DEF}: src/front/Find_def.cpp
 ${SHARED}: src/Shared.cpp
 	${CC} ${CCFLAGS} -c src/Shared.cpp -o ${SHARED}
 
-lib/runtime.o: lib/runtime.cpp
-	${CC} ${CCFLAGS} -c lib/runtime.cpp -o lib/runtime.o
+lib/runtime.o: lib/runtime.c
+	gcc -c lib/runtime.c -o lib/runtime.o
 
 clean : 
-	rm -f *.o latc latc_x86 && cd bnfc/ && make clean && cd ..
+	rm -f *.o latc latc_x86_64 lib/runtime.o && cd bnfc/ && make clean && cd ..

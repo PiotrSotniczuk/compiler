@@ -1,4 +1,6 @@
 .vscode
 *.o
-latc_x86
+latc_x86_64
 mrjp-tests-master
+playground
+latc
