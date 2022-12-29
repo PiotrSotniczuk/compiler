@@ -2,10 +2,10 @@
 #define FIND_DEF_HEADER
 /* You might want to change the above name. */
 
-#include "../bnfc/Skeleton.H"
+#include "../../bnfc/Skeleton.H"
 #include <map>
 #include <set>
-#include "../bnfc/Absyn.H"
+#include "../../bnfc/Absyn.H"
 
 using namespace std;
 

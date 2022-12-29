@@ -1,7 +1,7 @@
-#include "../bnfc/Skeleton.H"
+#include "../../bnfc/Skeleton.H"
 #include <iostream>
-#include "Front.h"
-#include "Shared.h"
+#include "Type_checker.h"
+#include "../Shared.h"
 
 using namespace std;
 

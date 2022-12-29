@@ -2,7 +2,7 @@
 #define FRONT_HEADER
 /* You might want to change the above name. */
 
-#include "../bnfc/Skeleton.H"
+#include "../../bnfc/Skeleton.H"
 #include <list>
 #include <map>
 

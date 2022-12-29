@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Find_def.h"
-#include "Shared.h"
+#include "../Shared.h"
 
 using namespace std;
 

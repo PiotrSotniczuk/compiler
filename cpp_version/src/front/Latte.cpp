@@ -1,10 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include "../bnfc/Parser.H"
-#include "../bnfc/Absyn.H"
-#include "Front.h"
+#include "../../bnfc/Parser.H"
+#include "../../bnfc/Absyn.H"
+#include "Type_checker.h"
 #include "Find_def.h"
-#include "Shared.h"
+#include "../Shared.h"
 
 using namespace std;
 
