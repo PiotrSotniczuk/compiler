@@ -16,7 +16,7 @@ void Compiler::visitString(String x){
 
 void Compiler::visitFnDef(FnDef *fn_def){
     string fun_content = fn_def->ident_ + ":\n";
-    fun_content += add_t_n(vector<string>({"pushq rbp", "movq rbp, rsp"}));
+    fun_content += add_t_n(vector<string>({"push ebp", "mov ebp, esp"}));
 
     this->act_content = "";
 
@@ -40,14 +40,14 @@ void Compiler::visitVRet(VRet *v_ret){
 void Compiler::visitRet(Ret *ret){
     ret->expr_->accept(this);
     this->act_content += add_t_n(vector<string>({
-       "popq rax", "leave", "ret"
+       "pop eax", "leave", "ret"
     }));
 }
 
 void Compiler::visitELitInt(ELitInt *e_lit_int){
     visitInteger(e_lit_int->integer_);
     this->act_content += add_t_n(vector<string>({
-        "pushq " + to_string(e_lit_int->integer_)
+        "push " + to_string(e_lit_int->integer_)
     }));
 }
 
@@ -59,28 +59,30 @@ void Compiler::visitEMul(EMul *e_mul){
     Times* type_times = dynamic_cast<Times*>(e_mul->mulop_);
     if(type_times){
         this->act_content += add_t_n(vector<string>({
-            "popq rax", "popq rcx", "imulq rcx", "pushq rax"
+            "pop eax", "pop ecx", "imul eax, ecx", "push eax"
         }));
         return;
     }
 
     this->act_content += add_t_n(vector<string>({
-        "popq rcx", "popq rax", "cdq", "idivq rcx"
+        "pop ecx", "pop eax", "cdq", "idiv ecx"
     }));
 
     Div* type_div = dynamic_cast<Div*>(e_mul->mulop_);
     if(type_div){
         this->act_content += add_t_n(vector<string>({
-            "pushq rax"
+            "push eax"
         }));
     }else{
         this->act_content += add_t_n(vector<string>({
-            "pushq rdx"
+            "push edx"
         }));
     }
 }
 
 void Compiler::visitEAdd(EAdd *e_add){
+    // TODO strings
+
     // push first expression "a" 
     e_add->expr_1->accept(this);
 
@@ -92,19 +94,19 @@ void Compiler::visitEAdd(EAdd *e_add){
     string op = "";
     if(type_plus){
         // a = a + c
-        op = "addq rax, rcx";
+        op = "add eax, ecx";
     }else{
-        op = "subq rax, rcx";
+        op = "sub eax, ecx";
     }
 
     this->act_content += add_t_n(vector<string>({
-        "popq rcx", "popq rax", op, "pushq rax"
+        "pop ecx", "pop eax", op, "push eax"
     }));
 }
 
 void Compiler::visitNeg(Neg *neg){
     neg->expr_->accept(this);
     this->act_content += add_t_n(vector<string>({
-        "popq rax", "neg rax", "pushq rax"
+        "pop eax", "neg eax", "push eax"
     }));
 }
