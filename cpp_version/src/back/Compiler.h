@@ -21,6 +21,24 @@ class Compiler : public Skeleton {
     private:
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
+        virtual void visitRet(Ret *p);
+        virtual void visitVRet(VRet *p);
+        virtual void visitELitInt(ELitInt *e_lit_int);
+        virtual void visitEAdd(EAdd *e_add);
+        virtual void visitNeg(Neg *neg);
+        virtual void visitEMul(EMul *e_mul);
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
 };
 
 #endif
