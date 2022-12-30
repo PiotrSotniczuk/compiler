@@ -50,10 +50,6 @@ int main(int argc, char **argv)
 	CheckReturn *ret = new CheckReturn();
 	ret->run(parse_tree);
 	
-
-	
-
-
 	cerr << "OK\n";
 
 	return 0;

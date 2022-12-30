@@ -1,58 +1,25 @@
-#include <iostream>
-#include <fstream>
-#include "../../bnfc/Parser.H"
-#include "../../bnfc/Absyn.H"
-#include "../Shared.h"
-#include <filesystem>
+#include "Compiler.h"
 
-namespace fs = std::filesystem;
-using namespace std;
+void Compiler::visitString(String x){
+    int size = this->local_const.size();
+    this->local_const.emplace(make_pair(x, size));
+}
 
+void Compiler::visitFnDef(FnDef *fn_def){
+    string fun_content = fn_def->ident_ + ":\n";
+    fun_content += "\tpushq rbp\n\tmovq rbp, rsp\n";
 
-string HEADER = ".data\n" + string(".text\n") + ".globl main\n";
+    this->act_content = "";
 
+    fn_def->type_->accept(this);
+    visitIdent(fn_def->ident_);
+    fn_def->listarg_->accept(this);
+    fn_def->block_->accept(this);
 
-int main(int argc, char **argv)
-{
-	if (argc != 2) {
-		cerr << "Bad number of args you can only pass the path to file\n";
-		exit(1);
-	}
-	
- 	char *filepath = argv[1];
-	FILE *input = fopen(filepath, "r");
-	if (!input) {
-		cerr << "Can't open file!\n";
-		exit(1);
-	}
+    Void* type_void = dynamic_cast<Void*>(fn_def->type_);
+    if (type_void){
+        this->act_content += "\tleave\n\tret\n";
+    }
 
-	Program *parse_tree = pProgram(input);
-	if (!parse_tree) {
-		exit(1);
-	}
-
-    string main_fun = "main:\n";
-
-
-
-
-
-    
-	
-
-    string asm_file = fs::path(filepath).replace_extension("s");
-	ofstream out(asm_file);
-
-    out << (HEADER + main_fun);
-    out.close();
-
-    asm_file = "\"" + asm_file + "\"";
-    string target_file = "\"" + string(fs::path(filepath).replace_extension("")) + "\"";
-    
-
-	string to_binary = "gcc lib/runtime.o " + asm_file + " -no-pie -masm=intel -o " + target_file;
-    cout << to_binary;
-	system(to_binary.c_str());
-
-	return 0;
+    this->content += fun_content + this->act_content;
 }
