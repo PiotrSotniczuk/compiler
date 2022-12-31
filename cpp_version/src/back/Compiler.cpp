@@ -110,3 +110,81 @@ void Compiler::visitNeg(Neg *neg){
         "pop eax", "neg eax", "push eax"
     }));
 }
+
+void Compiler::visitEApp(EApp *e_app){
+    visitIdent(e_app->ident_);
+    e_app->listexpr_->accept(this);
+    int size = e_app->listexpr_->size();
+    this->act_content += add_t_n(vector<string>({
+        "call " + e_app->ident_, "add esp, " + to_string(size * 4), "push eax"
+    }));
+}
+
+void Compiler::visitListExpr(ListExpr *list_expr){
+    // do it from last to first
+    auto it = list_expr->rbegin();
+    while (it != list_expr->rend()){
+        (*it)->accept(this);
+        it++;
+    }
+}
+
+void Compiler::visitEString(EString *e_string){
+    this->visitString(e_string->string_);
+    int index = this->local_const.find(e_string->string_)->second;
+    this->act_content += add_t_n(vector<string>({
+        "lea eax, .LC" + to_string(index), "push eax"
+    }));
+}
+
+void Compiler::visitELitTrue(ELitTrue *e_lit_true){
+    this->act_content += add_t_n(vector<string>({
+        "push 1"
+    }));
+}
+
+void Compiler::visitELitFalse(ELitFalse *e_lit_false){
+    this->act_content += add_t_n(vector<string>({
+        "push 0"
+    }));
+}
+
+void Compiler::visitNot(Not *not_){
+    not_->expr_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "add eax, 1", "and eax, 1", "push eax"
+    }));
+}
+
+void Compiler::visitEAnd(EAnd *e_and){
+    int c = this->lazy_count;
+    this->lazy_count++;
+    string lazy = "_lazy" + to_string(c);
+
+    // lazy evaluation
+    e_and->expr_1->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "test eax, eax", "jz " + lazy
+    }));
+
+    e_and->expr_2->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", lazy+":", "push eax"
+    }));
+}
+
+void Compiler::visitEOr(EOr *e_or){
+    int c = this->lazy_count;
+    this->lazy_count++;
+    string lazy = "_lazy" + to_string(c);
+
+    e_or->expr_1->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "test eax, eax", "jnz " + lazy
+    }));
+
+    e_or->expr_2->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", lazy+":", "push eax"
+    }));
+}

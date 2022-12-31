@@ -1,7 +1,7 @@
 #include <stdio.h>
 // #include <string.h>
 // #include <limits.h>
-// #include <stdlib.h>
+#include <stdlib.h>
 
 void printString(char *s) {
     printf("%s\n", s);
@@ -27,6 +27,11 @@ char *readString(void) {
     }
 
     return line;
+}
+
+void error() {
+    puts("runtime error");
+    exit(1);
 }
 
 // char *__concat(char *str1, char *str2) {
