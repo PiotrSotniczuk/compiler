@@ -4,7 +4,12 @@
 string add_t_n(vector<string> instr){
     string ret = "";
     for (string s: instr){
-        ret += "\t" + s + "\n";
+        char first = s[0];
+        if(first != '_'){
+            ret += "\t";
+        }
+
+        ret += s + "\n";
     }
     return ret;
 }
@@ -33,7 +38,7 @@ void Compiler::visitFnDef(FnDef *fn_def){
     this->content += fun_content + this->act_content;
 }
 
-void Compiler::visitVRet(VRet *v_ret){
+void Compiler::visitVRet(__attribute__((unused)) VRet *v_ret){
     this->act_content += add_t_n(vector<string>({"leave", "ret"}));
 }
 
@@ -137,13 +142,13 @@ void Compiler::visitEString(EString *e_string){
     }));
 }
 
-void Compiler::visitELitTrue(ELitTrue *e_lit_true){
+void Compiler::visitELitTrue(__attribute__((unused)) ELitTrue *e_lit_true){
     this->act_content += add_t_n(vector<string>({
         "push 1"
     }));
 }
 
-void Compiler::visitELitFalse(ELitFalse *e_lit_false){
+void Compiler::visitELitFalse(__attribute__((unused)) ELitFalse *e_lit_false){
     this->act_content += add_t_n(vector<string>({
         "push 0"
     }));
@@ -157,8 +162,7 @@ void Compiler::visitNot(Not *not_){
 }
 
 void Compiler::visitEAnd(EAnd *e_and){
-    int c = this->lazy_count;
-    this->lazy_count++;
+    int c = this->get_l_count();
     string lazy = "_lazy" + to_string(c);
 
     // lazy evaluation
@@ -174,8 +178,7 @@ void Compiler::visitEAnd(EAnd *e_and){
 }
 
 void Compiler::visitEOr(EOr *e_or){
-    int c = this->lazy_count;
-    this->lazy_count++;
+    int c = this->get_l_count();
     string lazy = "_lazy" + to_string(c);
 
     e_or->expr_1->accept(this);
@@ -186,5 +189,59 @@ void Compiler::visitEOr(EOr *e_or){
     e_or->expr_2->accept(this);
     this->act_content += add_t_n(vector<string>({
         "pop eax", lazy+":", "push eax"
+    }));
+}
+
+void Compiler::visitCond(Cond *cond){
+    int c = this->get_l_count();
+    string if_cond = "_if" + to_string(c);
+    cond->expr_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "test eax, eax", "jz " + if_cond
+    }));
+
+    cond->stmt_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        if_cond + ":"
+    }));
+}
+
+void Compiler::visitCondElse(CondElse *cond_else){
+    int c = this->get_l_count();
+    string if_else = "_if_else" + to_string(c);
+    string end = "_end_if" + to_string(c);
+
+    cond_else->expr_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "test eax, eax", "jz " + if_else
+    }));
+
+    cond_else->stmt_1->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "jmp " + end, if_else + ":"
+    }));
+
+    cond_else->stmt_2->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        end + ":"
+    }));
+}
+
+void Compiler::visitWhile(While *while_){
+    int c = this->get_l_count();
+    string start = "_while" + to_string(c);
+    string end = "_end_while" + to_string(c);
+
+    this->act_content += add_t_n(vector<string>({
+        start + ":"
+    }));
+    while_->expr_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "test eax, eax", "jz " + end
+    }));
+
+    while_->stmt_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "jmp " + start, end + ":"
     }));
 }

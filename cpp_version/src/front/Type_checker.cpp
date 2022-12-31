@@ -287,6 +287,7 @@ void TypeChecker::visitERel(ERel *e_rel)
   EQU* equ = dynamic_cast<EQU*>(e_rel->relop_);
   NE* ne = dynamic_cast<NE*>(e_rel->relop_);
 
+  // operations like "<", "<="
   if(equ == NULL && ne == NULL){
     if(type1 != "int"){
       go_error(e_rel->line_number, "This operator works only with 'int'.");

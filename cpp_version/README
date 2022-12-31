@@ -20,3 +20,4 @@ Komenda 'make clean' usuwa wszystkie pliki wygenerowane przez komende make.
 
 g++ -m32 -c runtime.cpp  -o runtime.o
 
+porównywanie sgtringów poprzez adres

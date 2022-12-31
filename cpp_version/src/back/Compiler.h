@@ -14,13 +14,14 @@ class Compiler : public Skeleton {
             this->content = "";
             this->act_content ="";
             this->local_const = map<string, int>();
-            this->lazy_count = 0;
+            this->label_count = 0;
         };
         string content;
         map<string, int> local_const;
     private:
         string act_content;
-        int lazy_count;
+        int label_count;
+        int get_l_count(){return label_count++;}
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);
@@ -37,9 +38,9 @@ class Compiler : public Skeleton {
         virtual void visitNot(Not *not_);
         virtual void visitEAnd(EAnd *e_and);
         virtual void visitEOr(EOr *e_or);
-        // virtual void ;
-        // virtual void ;
-        // virtual void ;
+        virtual void visitCond(Cond *cond);
+        virtual void visitCondElse(CondElse *cond_else);
+        virtual void visitWhile(While *while_);
         // virtual void ;
         // virtual void ;
         // virtual void ;
