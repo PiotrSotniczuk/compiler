@@ -245,3 +245,23 @@ void Compiler::visitWhile(While *while_){
         "jmp " + start, end + ":"
     }));
 }
+
+void Compiler::visitERel(ERel *e_rel){
+    // TODO porownywanie stringow nie po adresie
+    e_rel->expr_1->accept(this);
+    e_rel->relop_->accept(this);
+    e_rel->expr_2->accept(this);
+
+    string op = "";
+    if(dynamic_cast<LTH*>(e_rel->relop_)){op = "l";}
+    if(dynamic_cast<LE*>(e_rel->relop_)){op = "le";}
+    if(dynamic_cast<GTH*>(e_rel->relop_)){op = "g";}
+    if(dynamic_cast<GE*>(e_rel->relop_)){op = "ge";}
+    if(dynamic_cast<EQU*>(e_rel->relop_)){op = "e";}
+    if(dynamic_cast<NE*>(e_rel->relop_)){op = "ne";}
+
+    this->act_content += add_t_n(vector<string>({
+        "pop ecx", "pop eax", "xor edx, edx", "cmp eax, ecx",
+        "set" + op + " dl", "push edx"
+    }));
+}

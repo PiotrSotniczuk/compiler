@@ -41,7 +41,7 @@ class Compiler : public Skeleton {
         virtual void visitCond(Cond *cond);
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_);
-        // virtual void ;
+        virtual void visitERel(ERel *e_rel);
         // virtual void ;
         // virtual void ;
         // virtual void ;
