@@ -276,6 +276,22 @@ void Compiler::visitERel(ERel *e_rel){
     e_rel->relop_->accept(this);
     e_rel->expr_2->accept(this);
 
+    string t = this->expr_type;
+    this->expr_type = "boolean";
+
+    if(t == "string"){
+        if(dynamic_cast<EQU*>(e_rel->relop_)){
+            this->act_content += add_t_n(vector<string>({
+                "call __compare_str", "add esp, 8", "push eax"
+            }));
+        }else{
+            this->act_content += add_t_n(vector<string>({
+                "call __compare_str", "add esp, 8", "add eax, 1", "and eax, 1", "push eax"
+            }));
+        }
+        return;
+    }
+
     string op = "";
     if(dynamic_cast<LTH*>(e_rel->relop_)){op = "l";}
     if(dynamic_cast<LE*>(e_rel->relop_)){op = "le";}
@@ -288,7 +304,6 @@ void Compiler::visitERel(ERel *e_rel){
         "pop ecx", "pop eax", "xor edx, edx", "cmp eax, ecx",
         "set" + op + " dl", "push edx"
     }));
-    this->expr_type = "boolean";
 }
 
 void Compiler::visitBlk(Blk *blk){

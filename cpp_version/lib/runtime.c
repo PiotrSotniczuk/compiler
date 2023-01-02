@@ -32,8 +32,13 @@ void error() {
     exit(1);
 }
 
+// returns like boolean
 int __compare_str(char *str1, char *str2){
-    return strcmp(str1, str2);
+    if(strcmp(str1, str2) == 0){
+        return 1;
+    }else{
+        return 0;
+    }     
 }
 
 //https://www.codeproject.com/Questions/5314795/How-do-I-concatenate-2-pointer-strings-correctly
