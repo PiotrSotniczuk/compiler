@@ -1,5 +1,6 @@
 #include "Compiler.h"
 #include <vector>
+#include <cassert>
 
 string add_t_n(vector<string> instr){
     string ret = "";
@@ -8,7 +9,6 @@ string add_t_n(vector<string> instr){
         if(first != '_'){
             ret += "\t";
         }
-
         ret += s + "\n";
     }
     return ret;
@@ -20,22 +20,32 @@ void Compiler::visitString(String x){
 }
 
 void Compiler::visitFnDef(FnDef *fn_def){
-    string fun_content = fn_def->ident_ + ":\n";
-    fun_content += add_t_n(vector<string>({"push ebp", "mov ebp, esp"}));
+    string fun_prefix = fn_def->ident_ + ":\n";
+    fun_prefix += add_t_n(vector<string>({"push ebp", "mov ebp, esp"}));
 
     this->act_content = "";
+    this->vars_size = 0;
 
     fn_def->type_->accept(this);
     visitIdent(fn_def->ident_);
-    fn_def->listarg_->accept(this);
-    fn_def->block_->accept(this);
 
+
+    this->vars_offsets.push_front(map<string, int>());
+    fn_def->listarg_->accept(this);
+
+    Blk* blk = dynamic_cast<Blk*>(fn_def->block_);
+    blk->liststmt_->accept(this);
+    this->vars_offsets.pop_front();
+
+    fun_prefix += add_t_n(vector<string>({"sub esp, " + to_string(this->vars_size*4)}));
+
+    // add return if type void
     Void* type_void = dynamic_cast<Void*>(fn_def->type_);
     if (type_void){
         this->act_content += add_t_n(vector<string>({"leave", "ret"}));
     }
 
-    this->content += fun_content + this->act_content;
+    this->content += fun_prefix + this->act_content;
 }
 
 void Compiler::visitVRet(__attribute__((unused)) VRet *v_ret){
@@ -86,7 +96,7 @@ void Compiler::visitEMul(EMul *e_mul){
 }
 
 void Compiler::visitEAdd(EAdd *e_add){
-    // TODO strings
+    // TODO strings with concatenation
 
     // push first expression "a" 
     e_add->expr_1->accept(this);
@@ -263,5 +273,99 @@ void Compiler::visitERel(ERel *e_rel){
     this->act_content += add_t_n(vector<string>({
         "pop ecx", "pop eax", "xor edx, edx", "cmp eax, ecx",
         "set" + op + " dl", "push edx"
+    }));
+}
+
+void Compiler::visitBlk(Blk *blk){
+    this->vars_offsets.push_front(map<string, int>());
+    blk->liststmt_->accept(this);
+    this->vars_offsets.pop_front();
+}
+
+void Compiler::visitListArg(ListArg *list_arg){
+    // add arguments to vars_offsets (above ret in stack)
+    int offset = 2*4;
+    for (ListArg::iterator i = list_arg->begin() ; i != list_arg->end() ; ++i){
+        (*i)->accept(this);
+        Ar* ar = dynamic_cast<Ar*>(*i);
+        assert(ar);
+        this->vars_offsets.begin()->emplace(make_pair(ar->ident_, offset));
+        offset += 4;
+    }
+}
+
+void Compiler::visitNoInit(NoInit *no_init){
+    visitIdent(no_init->ident_);
+    int offset = -1 * this->vars_size - 4;
+    this->vars_offsets.begin()->emplace(make_pair(no_init->ident_, offset));
+
+        // TODO inicjalizacja stringow moze np dodac LC_empty_str: ""
+    this->act_content += add_t_n(vector<string>({
+        "mov dword ptr [ebp" + to_string(offset) + "], 0"
+    }));
+    this->vars_size++;
+}
+
+void Compiler::visitInit(Init *init){
+    visitIdent(init->ident_);
+    int offset = -1 * this->vars_size - 4;
+    this->vars_offsets.begin()->emplace(make_pair(init->ident_, offset));
+    this->vars_size++;
+
+    init->expr_->accept(this);
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "mov dword ptr [ebp" + to_string(offset) + ("], eax")
+    }));  
+}
+
+int Compiler::get_var_offset(string var){
+    for (auto const& mapa : this->vars_offsets){
+        auto it = mapa.find(var);
+        if(it != mapa.end()){
+            return it->second;
+        }
+    }
+    assert(false);
+    return 0;
+}
+
+string offset_str(int offset){
+    string maybe_plus = "";
+    if(offset >= 0) {maybe_plus = "+";}
+    return maybe_plus + to_string(offset);
+}
+
+void Compiler::visitAss(Ass *ass){
+    visitIdent(ass->ident_);
+    ass->expr_->accept(this);
+    int byte_off = get_var_offset(ass->ident_);
+
+    this->act_content += add_t_n(vector<string>({
+        "pop eax", "mov dword ptr [ebp" + offset_str(byte_off) + ("], eax")
+    })); 
+}
+
+void Compiler::visitIncr(Incr *incr){
+    visitIdent(incr->ident_);
+    int byte_off = get_var_offset(incr->ident_);
+
+    this->act_content += add_t_n(vector<string>({
+        "inc dword ptr [ebp" + offset_str(byte_off) + "]"
+    }));
+}
+
+void Compiler::visitDecr(Decr *decr){
+    visitIdent(decr->ident_);
+    int byte_off = get_var_offset(decr->ident_);
+    this->act_content += add_t_n(vector<string>({
+        "dec dword ptr [ebp" + offset_str(byte_off) + "]"
+    }));
+}
+
+void Compiler::visitEVar(EVar *e_var){
+    visitIdent(e_var->ident_);
+    int byte_off = get_var_offset(e_var->ident_);
+    this->act_content += add_t_n(vector<string>({
+        "push [ebp" + offset_str(byte_off) + "]"
     }));
 }

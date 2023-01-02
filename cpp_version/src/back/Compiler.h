@@ -5,6 +5,7 @@
 #include "../../bnfc/Skeleton.H"
 #include "../../bnfc/Absyn.H"
 #include <map>
+#include <list>
 
 using namespace std;
 
@@ -12,16 +13,21 @@ class Compiler : public Skeleton {
     public:
         Compiler(void){
             this->content = "";
-            this->act_content ="";
+            this->act_content = "";
             this->local_const = map<string, int>();
+            this->vars_offsets = list<map<string, int>>();
             this->label_count = 0;
+            this->vars_size = 0;
         };
         string content;
         map<string, int> local_const;
     private:
+        int vars_size;
+        list<map<string, int>> vars_offsets;
         string act_content;
         int label_count;
         int get_l_count(){return label_count++;}
+        int get_var_offset(string var);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);
@@ -42,8 +48,14 @@ class Compiler : public Skeleton {
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_);
         virtual void visitERel(ERel *e_rel);
-        // virtual void ;
-        // virtual void ;
+        virtual void visitBlk(Blk *blk);
+        virtual void visitListArg(ListArg *list_arg);
+        virtual void visitNoInit(NoInit *no_init);
+        virtual void visitInit(Init *init);
+        virtual void visitAss(Ass *ass);
+        virtual void visitIncr(Incr *incr);
+        virtual void visitDecr(Decr *decr);
+        virtual void visitEVar(EVar *e_var);
         // virtual void ;
         // virtual void ;
         // virtual void ;
