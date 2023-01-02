@@ -2,32 +2,28 @@ CC=g++
 CCFLAGS=-g -W -Wall -std=c++17
 
 BNFC_FILES=bnfc/Absyn.o bnfc/Lexer.o bnfc/Parser.o bnfc/Skeleton.o
-LATC_O=latc.o
 TYPE_CHECKER=Type_checker.o
 FIND_DEF=Find_def.o
 SHARED=Shared.o
-FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED} ${LATC_O}
+FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED}
 COMPILER=Compiler.o
-BACK_LIBS=${BNFC_FILES} ${COMPILER}
+BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${SHARED}
 
 all: latc latc_x86_32
 
-latc: ${BNFC_FILES} ${FRONT_LIBS}
+latc: ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp
 	@echo "Compiling LatteFront..."
-	${CC} ${CCFLAGS} ${BNFC_FILES} ${FRONT_LIBS} -o latc
+	${CC} ${CCFLAGS} ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp -o latc
 
 latc_x86_32: lib/runtime.o src/back/Back.cpp ${BACK_LIBS}
 	@echo "Compiling LatteBack..."
 	${CC} ${CCFLAGS} ${BACK_LIBS} src/back/Back.cpp -o latc_x86_32
 
-${LATC_O} : src/front/Latte.cpp
-	${CC} ${CCFLAGS} -c src/front/Latte.cpp -o ${LATC_O}
-
 ${TYPE_CHECKER}: src/front/Type_checker.cpp
 	${CC} ${CCFLAGS} -c src/front/Type_checker.cpp -o ${TYPE_CHECKER}
 
-${FIND_DEF}: src/front/Find_def.cpp
-	${CC} ${CCFLAGS} -c src/front/Find_def.cpp -o ${FIND_DEF}
+${FIND_DEF}: src/front/Find_def.cpp ${SHARED}
+	${CC} ${CCFLAGS} -c ${SHARED} src/front/Find_def.cpp -o ${FIND_DEF}
 
 ${SHARED}: src/Shared.cpp
 	${CC} ${CCFLAGS} -c src/Shared.cpp -o ${SHARED}

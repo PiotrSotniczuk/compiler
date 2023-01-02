@@ -271,6 +271,10 @@ void TypeChecker::visitEAdd(EAdd *e_add)
   if(type1 != "string" && type1 != "int"){
     go_error(e_add->line_number, "Types for addition are not 'int' or 'string'.");
   }
+
+  if(type1 == "string" && dynamic_cast<Minus*>(e_add->addop_)){
+    go_error(e_add->line_number, "You cannot use '-' operation on yype 'string'.");
+  }
   this->expr_type = type1;
 }
 

@@ -30,7 +30,7 @@ void Compiler::visitFnDef(FnDef *fn_def){
     visitIdent(fn_def->ident_);
 
 
-    this->vars_offsets.push_front(map<string, int>());
+    this->vars_offsets.push_front(map<string, pair<string, int>>());
     fn_def->listarg_->accept(this);
 
     Blk* blk = dynamic_cast<Blk*>(fn_def->block_);
@@ -64,12 +64,14 @@ void Compiler::visitELitInt(ELitInt *e_lit_int){
     this->act_content += add_t_n(vector<string>({
         "push " + to_string(e_lit_int->integer_)
     }));
+    this->expr_type = "int";
 }
 
 void Compiler::visitEMul(EMul *e_mul){
     e_mul->expr_1->accept(this);
     e_mul->mulop_->accept(this);
     e_mul->expr_2->accept(this);
+    this->expr_type = "int";
 
     Times* type_times = dynamic_cast<Times*>(e_mul->mulop_);
     if(type_times){
@@ -96,14 +98,19 @@ void Compiler::visitEMul(EMul *e_mul){
 }
 
 void Compiler::visitEAdd(EAdd *e_add){
-    // TODO strings with concatenation
-
     // push first expression "a" 
     e_add->expr_1->accept(this);
 
     e_add->addop_->accept(this);
     // push second "c"
     e_add->expr_2->accept(this);
+
+    if(this->expr_type == "string"){
+        this->act_content += add_t_n(vector<string>({
+            "pop ecx", "pop eax", "push ecx", "push eax", "call __concat", "add esp, 8", "push eax"
+        }));
+        return;
+    }
 
     Plus* type_plus = dynamic_cast<Plus*>(e_add->addop_);
     string op = "";
@@ -124,6 +131,7 @@ void Compiler::visitNeg(Neg *neg){
     this->act_content += add_t_n(vector<string>({
         "pop eax", "neg eax", "push eax"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitEApp(EApp *e_app){
@@ -133,6 +141,7 @@ void Compiler::visitEApp(EApp *e_app){
     this->act_content += add_t_n(vector<string>({
         "call " + e_app->ident_, "add esp, " + to_string(size * 4), "push eax"
     }));
+    this->expr_type = this->funs.find(e_app->ident_)->second.first;
 }
 
 void Compiler::visitListExpr(ListExpr *list_expr){
@@ -150,18 +159,21 @@ void Compiler::visitEString(EString *e_string){
     this->act_content += add_t_n(vector<string>({
         "lea eax, .LC" + to_string(index), "push eax"
     }));
+    this->expr_type = "string";
 }
 
 void Compiler::visitELitTrue(__attribute__((unused)) ELitTrue *e_lit_true){
     this->act_content += add_t_n(vector<string>({
         "push 1"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitELitFalse(__attribute__((unused)) ELitFalse *e_lit_false){
     this->act_content += add_t_n(vector<string>({
         "push 0"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitNot(Not *not_){
@@ -169,6 +181,7 @@ void Compiler::visitNot(Not *not_){
     this->act_content += add_t_n(vector<string>({
         "pop eax", "add eax, 1", "and eax, 1", "push eax"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitEAnd(EAnd *e_and){
@@ -185,6 +198,7 @@ void Compiler::visitEAnd(EAnd *e_and){
     this->act_content += add_t_n(vector<string>({
         "pop eax", lazy+":", "push eax"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitEOr(EOr *e_or){
@@ -200,6 +214,7 @@ void Compiler::visitEOr(EOr *e_or){
     this->act_content += add_t_n(vector<string>({
         "pop eax", lazy+":", "push eax"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitCond(Cond *cond){
@@ -257,7 +272,6 @@ void Compiler::visitWhile(While *while_){
 }
 
 void Compiler::visitERel(ERel *e_rel){
-    // TODO porownywanie stringow nie po adresie
     e_rel->expr_1->accept(this);
     e_rel->relop_->accept(this);
     e_rel->expr_2->accept(this);
@@ -274,10 +288,11 @@ void Compiler::visitERel(ERel *e_rel){
         "pop ecx", "pop eax", "xor edx, edx", "cmp eax, ecx",
         "set" + op + " dl", "push edx"
     }));
+    this->expr_type = "boolean";
 }
 
 void Compiler::visitBlk(Blk *blk){
-    this->vars_offsets.push_front(map<string, int>());
+    this->vars_offsets.push_front(map<string, pair<string, int>>());
     blk->liststmt_->accept(this);
     this->vars_offsets.pop_front();
 }
@@ -287,38 +302,48 @@ void Compiler::visitListArg(ListArg *list_arg){
     int offset = 2*4;
     for (ListArg::iterator i = list_arg->begin() ; i != list_arg->end() ; ++i){
         (*i)->accept(this);
+        string t = this->last_type;
         Ar* ar = dynamic_cast<Ar*>(*i);
         assert(ar);
-        this->vars_offsets.begin()->emplace(make_pair(ar->ident_, offset));
+        this->vars_offsets.begin()->emplace(make_pair(ar->ident_, make_pair(t, offset)));
         offset += 4;
     }
 }
 
 void Compiler::visitNoInit(NoInit *no_init){
     visitIdent(no_init->ident_);
-    int offset = -1 * this->vars_size - 4;
-    this->vars_offsets.begin()->emplace(make_pair(no_init->ident_, offset));
+    int offset = -1 * 4*this->vars_size - 4;
 
-        // TODO inicjalizacja stringow moze np dodac LC_empty_str: ""
-    this->act_content += add_t_n(vector<string>({
-        "mov dword ptr [ebp" + to_string(offset) + "], 0"
-    }));
+    string type = this->last_type;
+    this->vars_offsets.begin()->emplace(make_pair(no_init->ident_, make_pair(type, offset)));
+
+    if(type == "string"){
+        this->act_content += add_t_n(vector<string>({
+            "mov eax, .LC_empty_str", "mov dword ptr [ebp" + to_string(offset) + "], eax"
+        }));
+    }else{
+        this->act_content += add_t_n(vector<string>({
+            "mov dword ptr [ebp" + to_string(offset) + "], 0"
+        }));
+    }
     this->vars_size++;
 }
 
 void Compiler::visitInit(Init *init){
     visitIdent(init->ident_);
-    int offset = -1 * this->vars_size - 4;
-    this->vars_offsets.begin()->emplace(make_pair(init->ident_, offset));
+    int offset = -1 * 4*this->vars_size - 4;
+    string t = this->last_type;
     this->vars_size++;
-
     init->expr_->accept(this);
+
+    this->vars_offsets.begin()->emplace(make_pair(init->ident_, make_pair(t, offset)));
+
     this->act_content += add_t_n(vector<string>({
         "pop eax", "mov dword ptr [ebp" + to_string(offset) + ("], eax")
     }));  
 }
 
-int Compiler::get_var_offset(string var){
+pair<string, int> Compiler::get_var(string var){
     for (auto const& mapa : this->vars_offsets){
         auto it = mapa.find(var);
         if(it != mapa.end()){
@@ -326,7 +351,6 @@ int Compiler::get_var_offset(string var){
         }
     }
     assert(false);
-    return 0;
 }
 
 string offset_str(int offset){
@@ -338,7 +362,7 @@ string offset_str(int offset){
 void Compiler::visitAss(Ass *ass){
     visitIdent(ass->ident_);
     ass->expr_->accept(this);
-    int byte_off = get_var_offset(ass->ident_);
+    int byte_off = get_var(ass->ident_).second;
 
     this->act_content += add_t_n(vector<string>({
         "pop eax", "mov dword ptr [ebp" + offset_str(byte_off) + ("], eax")
@@ -347,7 +371,7 @@ void Compiler::visitAss(Ass *ass){
 
 void Compiler::visitIncr(Incr *incr){
     visitIdent(incr->ident_);
-    int byte_off = get_var_offset(incr->ident_);
+    int byte_off = get_var(incr->ident_).second;
 
     this->act_content += add_t_n(vector<string>({
         "inc dword ptr [ebp" + offset_str(byte_off) + "]"
@@ -356,7 +380,7 @@ void Compiler::visitIncr(Incr *incr){
 
 void Compiler::visitDecr(Decr *decr){
     visitIdent(decr->ident_);
-    int byte_off = get_var_offset(decr->ident_);
+    int byte_off = get_var(decr->ident_).second;
     this->act_content += add_t_n(vector<string>({
         "dec dword ptr [ebp" + offset_str(byte_off) + "]"
     }));
@@ -364,8 +388,9 @@ void Compiler::visitDecr(Decr *decr){
 
 void Compiler::visitEVar(EVar *e_var){
     visitIdent(e_var->ident_);
-    int byte_off = get_var_offset(e_var->ident_);
+    int byte_off = get_var(e_var->ident_).second;
     this->act_content += add_t_n(vector<string>({
         "push [ebp" + offset_str(byte_off) + "]"
     }));
+    this->expr_type = get_var(e_var->ident_).first;
 }

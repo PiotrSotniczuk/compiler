@@ -3,6 +3,7 @@
 #include "../../bnfc/Parser.H"
 #include "../../bnfc/Absyn.H"
 #include "../Shared.h"
+#include "../front/Find_def.h"
 #include <filesystem>
 #include "Compiler.h"
 #include <string>
@@ -33,11 +34,15 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	Compiler *comp = new Compiler();
+	FindDef *fdef = new FindDef();
+	fdef->run(parse_tree);
+
+	Compiler *comp = new Compiler(fdef->funs);
 	comp->run(parse_tree);
 	string content = comp->content;
 	
 	string local_const_string = "";
+	local_const_string += ".LC_empty_str:\n\t.string \"\"\n";
 	for(auto pair: comp->local_const){
 		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + pair.first + "\"\n";
 	}

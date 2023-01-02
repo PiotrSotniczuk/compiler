@@ -11,23 +11,28 @@ using namespace std;
 
 class Compiler : public Skeleton {
     public:
-        Compiler(void){
+        Compiler(map<string, pair<string, vector<string>>> funs){
             this->content = "";
             this->act_content = "";
             this->local_const = map<string, int>();
-            this->vars_offsets = list<map<string, int>>();
+            this->vars_offsets = list<map<string, pair<string, int>>>();
             this->label_count = 0;
             this->vars_size = 0;
+            this->expr_type = "";
+            this->funs = funs;
         };
         string content;
         map<string, int> local_const;
     private:
+        map<string, pair<string, vector<string>>> funs;
         int vars_size;
-        list<map<string, int>> vars_offsets;
+        string expr_type;
+        // list of envs, map of <var_name, (type, offset in stack)>
+        list<map<string, pair<string, int>>> vars_offsets;
         string act_content;
         int label_count;
         int get_l_count(){return label_count++;}
-        int get_var_offset(string var);
+        pair<string, int> get_var(string var);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);
