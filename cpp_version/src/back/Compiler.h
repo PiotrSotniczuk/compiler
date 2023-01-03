@@ -1,6 +1,5 @@
 #ifndef COMPILER_HEADER
 #define COMPILER_HEADER
-/* You might want to change the above name. */
 
 #include "../../bnfc/Skeleton.H"
 #include "../../bnfc/Absyn.H"
@@ -9,11 +8,12 @@
 
 using namespace std;
 
+// class to generate code from parse tree
 class Compiler : public Skeleton {
     public:
         Compiler(map<string, pair<string, vector<string>>> funs){
-            this->content = "";
-            this->act_content = "";
+            this->full_code = "";
+            this->act_code = "";
             this->local_const = map<string, int>();
             this->vars_offsets = list<map<string, pair<string, int>>>();
             this->label_count = 0;
@@ -21,17 +21,20 @@ class Compiler : public Skeleton {
             this->expr_type = "";
             this->funs = funs;
         };
-        string content;
+        string full_code;
+        // <var_name, place>
         map<string, int> local_const;
     private:
+        // functions definitions
         map<string, pair<string, vector<string>>> funs;
         int vars_size;
         string expr_type;
-        // list of envs, map of <var_name, (type, offset in stack)>
+        // list of envs, map of <var_name, (type, offset on stack)>
         list<map<string, pair<string, int>>> vars_offsets;
-        string act_content;
+        string act_code;
         int label_count;
         int get_l_count(){return label_count++;}
+        // get var from envs
         pair<string, int> get_var(string var);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
@@ -65,7 +68,6 @@ class Compiler : public Skeleton {
         // virtual void ;
         // virtual void ;
         // virtual void ;
-
 };
 
 #endif

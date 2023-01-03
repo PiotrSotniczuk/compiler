@@ -1,10 +1,10 @@
 import os
 import subprocess
 
-directory = '../mrjp-tests-master/good/basic'
-directory = '../lattests/good'
+directory = './mrjp-tests-master/good/basic'
+directory = 'lattests/good'
 
-exe = "./latc_x86_32"
+exe = "./cpp_version/latc_x86_32"
 
 file_list = os.listdir(directory)
 file_list.sort()

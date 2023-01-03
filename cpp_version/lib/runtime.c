@@ -32,7 +32,7 @@ void error() {
     exit(1);
 }
 
-// returns like boolean
+// returns like boolean 1 if eqal 0 if different
 int __compare_str(char *str1, char *str2){
     if(strcmp(str1, str2) == 0){
         return 1;

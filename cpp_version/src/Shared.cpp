@@ -12,61 +12,46 @@ void go_error(int line, string msg){
 }
 
 // https://stackoverflow.com/questions/42711201/output-a-c-string-including-all-escape-characters
-string sanitize(string const& s)
-{
+string sanitize(string s){
 	string out = "";
-   for ( auto ch : s )
-   {
-      switch (ch)
-      {
+    for ( auto ch : s ){
+      switch (ch){
          case '\'':
             out +=  "\\'";
             break;
-
          case '\"':
             out +=  "\\\"";
             break;
-
          case '\?':
             out +=  "\\?";
             break;
-
          case '\\':
             out +=  "\\\\";
             break;
-
          case '\a':
             out +=  "\\a";
             break;
-
          case '\b':
             out +=  "\\b";
             break;
-
          case '\f':
             out +=  "\\f";
             break;
-
          case '\n':
             out +=  "\\n";
             break;
-
          case '\r':
             out +=  "\\r";
             break;
-
          case '\t':
             out +=  "\\t";
             break;
-
          case '\v':
             out +=  "\\v";
             break;
-
          default:
             out +=  ch;
       }
-   }
-
-   return out;
+    }
+    return out;
 }
