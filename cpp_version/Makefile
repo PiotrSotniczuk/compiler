@@ -33,7 +33,7 @@ ${COMPILER}: src/back/Compiler.cpp
 	${CC} ${CCFLAGS} -c src/back/Compiler.cpp -o ${COMPILER}
 
 ${RUNTIME}: lib/runtime.c
-	gcc -c lib/runtime.c -o ${RUNTIME} -m32 -no-pie
+	i686-linux-gnu-gcc -c lib/runtime.c -o ${RUNTIME} -m32 -no-pie
 
 clean : 
 	rm -f *.o latc latc_x86 ${RUNTIME} && cd bnfc/ && make clean && cd ..

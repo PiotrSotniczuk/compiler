@@ -63,7 +63,7 @@ int main(int argc, char **argv){
 	string path_to_runtime = "\"" + path_to_root + "lib/runtime.o\"";
 
 	// generating binary executable
-	string to_binary = "gcc " + path_to_runtime + " " + asm_file + " -no-pie -m32 -masm=intel -o " + target_file;
+	string to_binary = "i686-linux-gnu-gcc " + path_to_runtime + " " + asm_file + " -no-pie -m32 -masm=intel -o " + target_file;
 	system(to_binary.c_str());
 
 	return 0;
