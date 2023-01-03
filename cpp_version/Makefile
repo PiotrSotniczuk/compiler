@@ -6,6 +6,7 @@ TYPE_CHECKER=Type_checker.o
 FIND_DEF=Find_def.o
 SHARED=Shared.o
 FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED}
+RUNTIME=lib/runtime.o
 COMPILER=Compiler.o
 BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${SHARED}
 
@@ -15,7 +16,7 @@ latc: ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp
 	@echo "Compiling LatteFront..."
 	${CC} ${CCFLAGS} ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp -o latc
 
-latc_x86_32: lib/runtime.o src/back/Back.cpp ${BACK_LIBS}
+latc_x86_32: ${RUNTIME} src/back/Back.cpp ${BACK_LIBS}
 	@echo "Compiling LatteBack..."
 	${CC} ${CCFLAGS} ${BACK_LIBS} src/back/Back.cpp -o latc_x86_32
 
@@ -31,8 +32,8 @@ ${SHARED}: src/Shared.cpp
 ${COMPILER}: src/back/Compiler.cpp
 	${CC} ${CCFLAGS} -c src/back/Compiler.cpp -o ${COMPILER}
 
-lib/runtime.o: lib/runtime.c
-	gcc -c lib/runtime.c -o lib/runtime.o -m32 -no-pie
+${RUNTIME}: lib/runtime.c
+	gcc -c lib/runtime.c -o ${RUNTIME} -m32 -no-pie
 
 clean : 
-	rm -f *.o latc latc_x86_32 lib/runtime.o && cd bnfc/ && make clean && cd ..
+	rm -f *.o latc latc_x86_32 ${RUNTIME} && cd bnfc/ && make clean && cd ..
