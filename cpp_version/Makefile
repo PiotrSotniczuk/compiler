@@ -22,8 +22,8 @@ latc_x86_32: lib/runtime.o src/back/Back.cpp ${BACK_LIBS}
 ${TYPE_CHECKER}: src/front/Type_checker.cpp
 	${CC} ${CCFLAGS} -c src/front/Type_checker.cpp -o ${TYPE_CHECKER}
 
-${FIND_DEF}: src/front/Find_def.cpp ${SHARED}
-	${CC} ${CCFLAGS} -c ${SHARED} src/front/Find_def.cpp -o ${FIND_DEF}
+${FIND_DEF}: src/front/Find_def.cpp
+	${CC} ${CCFLAGS} -c src/front/Find_def.cpp -o ${FIND_DEF}
 
 ${SHARED}: src/Shared.cpp
 	${CC} ${CCFLAGS} -c src/Shared.cpp -o ${SHARED}

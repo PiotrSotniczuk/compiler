@@ -44,10 +44,9 @@ int main(int argc, char **argv)
 	string local_const_string = "";
 	local_const_string += ".LC_empty_str:\n\t.string \"\"\n";
 	for(auto pair: comp->local_const){
-		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + pair.first + "\"\n";
+		string safe_str = sanitize(pair.first);
+		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + safe_str + "\"\n";
 	}
-
-
 
     string asm_file = fs::path(filepath).replace_extension("s");
 	ofstream out(asm_file);
