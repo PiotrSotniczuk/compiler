@@ -1,5 +1,6 @@
 #include "Compiler.h"
 #include <vector>
+#include "../Shared.h"
 
 // adds /t and /n to line of asm code
 string add_t_n(vector<string> instr){
@@ -43,7 +44,7 @@ void Compiler::visitFnDef(FnDef *fn_def){
 
     // add return at the end if type is void
     Void* type_void = dynamic_cast<Void*>(fn_def->type_);
-    if (type_void){
+    if (type_void && (!endsWith(this->act_code, "\tret\n"))){
         this->act_code += add_t_n({"leave", "ret"});
     }
 
@@ -75,7 +76,7 @@ void Compiler::visitEMul(EMul *e_mul){
     Times* op_times = dynamic_cast<Times*>(e_mul->mulop_);
     if(op_times){
         this->act_code += add_t_n({
-            "pop eax", "pop ecx", "imul eax, ecx", "push eax"
+            "pop eax", "imul dword ptr [esp]", "push eax"
         });
         return;
     }
@@ -102,7 +103,7 @@ void Compiler::visitEAdd(EAdd *e_add){
     // warning on stack expr_1 is deeper
     if(this->expr_type == "string"){
         this->act_code += add_t_n({
-            "pop ecx", "pop eax", "push ecx", "push eax", 
+            "pop eax", "xchg eax, dword ptr [esp]", "push eax", 
             "call __concat", "add esp, 8", "push eax"
         });
         return;
@@ -112,14 +113,14 @@ void Compiler::visitEAdd(EAdd *e_add){
     string op = op_plus? "add" : "sub";
 
     this->act_code += add_t_n({
-        "pop ecx", "pop eax", op + " eax, ecx", "push eax"
+        "pop eax", op + " [esp], eax"
     });
 }
 
 void Compiler::visitNeg(Neg *neg){
     neg->expr_->accept(this);
-    this->act_code += add_t_n({"pop eax", "neg eax", "push eax"});
-    this->expr_type = "boolean";
+    this->act_code += add_t_n({"neg dword ptr [esp]"});
+    this->expr_type = "int";
 }
 
 void Compiler::visitEApp(EApp *e_app){
@@ -127,13 +128,16 @@ void Compiler::visitEApp(EApp *e_app){
     e_app->listexpr_->accept(this);
     int size = e_app->listexpr_->size();
     this->act_code += add_t_n({
-        "call " + e_app->ident_, "add esp, " + to_string(size * 4), "push eax"
+        "call " + e_app->ident_, "add esp, " + to_string(size * 4)
     });
     this->expr_type = this->funs.find(e_app->ident_)->second.first;
+    if(this->expr_type != "void"){
+        this->act_code += add_t_n({"push eax"});
+    }
 }
 
 void Compiler::visitListExpr(ListExpr *list_expr){
-    // dplace aruments on stack in reversed order
+    // place aruments on stack in reversed order
     auto it = list_expr->rbegin();
     while (it != list_expr->rend()){
         (*it)->accept(this);
@@ -164,7 +168,7 @@ void Compiler::visitNot(Not *not_){
     not_->expr_->accept(this);
     // boolean not done ass adding 1 modulo 2
     this->act_code += add_t_n({
-        "pop eax", "add eax, 1", "and eax, 1", "push eax"
+        "add dword ptr [esp], 1", "and dword ptr [esp], 1"
     });
     this->expr_type = "boolean";
 }
@@ -278,8 +282,8 @@ void Compiler::visitERel(ERel *e_rel){
 
     // compare values from stack and set value depending on flags
     this->act_code += add_t_n({
-        "pop ecx", "pop eax", "xor edx, edx", "cmp eax, ecx",
-        "set" + op + " dl", "push edx"
+        "pop ecx", "xor eax, eax", "cmp dword ptr [esp], ecx",
+        "set" + op + " al", "push eax"
     });
 }
 

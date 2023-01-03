@@ -7,6 +7,7 @@
 #include <filesystem>
 #include "Compiler.h"
 #include <string>
+#include "Optimizations.h"
 
 namespace fs = std::filesystem;
 using namespace std;
@@ -50,10 +51,12 @@ int main(int argc, char **argv){
 		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + safe_str + "\"\n";
 	}
 
+	string optimized = remove_redundant_lines(HEADER + local_const_string + content);
+
 	// generating assembly file
     string asm_file = fs::path(filepath).replace_extension("s");
 	ofstream out(asm_file);
-    out << (HEADER + local_const_string + content);
+    out << optimized;
     out.close();
 
     asm_file = "\"" + asm_file + "\"";

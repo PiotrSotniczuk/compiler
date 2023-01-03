@@ -8,7 +8,8 @@ SHARED=Shared.o
 FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED}
 RUNTIME=lib/runtime.o
 COMPILER=Compiler.o
-BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${SHARED}
+OPTIMS=optims.o
+BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${SHARED} ${OPTIMS}
 
 all: latc latc_x86
 
@@ -31,6 +32,9 @@ ${SHARED}: src/Shared.cpp
 
 ${COMPILER}: src/back/Compiler.cpp
 	${CC} ${CCFLAGS} -c src/back/Compiler.cpp -o ${COMPILER}
+
+${OPTIMS}: src/back/Optimizations.cpp
+	${CC} ${CCFLAGS} -c src/back/Optimizations.cpp -o ${OPTIMS}
 
 ${RUNTIME}: lib/runtime.c
 	i686-linux-gnu-gcc -c lib/runtime.c -o ${RUNTIME} -m32 -no-pie

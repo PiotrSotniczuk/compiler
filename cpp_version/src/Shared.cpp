@@ -1,5 +1,9 @@
 #include "Shared.h"
 #include <iostream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <iterator>
 
 using namespace std;
 
@@ -51,4 +55,35 @@ string sanitize(string s){
       }
     }
     return out;
+}
+ 
+// https://www.techiedelight.com/check-if-a-string-ends-with-another-string-in-cpp/
+bool endsWith(std::string const &str, std::string const &suffix) {
+    if (str.length() < suffix.length()) {
+        return false;
+    }
+    return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
+
+bool startsWith(std::string const &str, std::string const &prefix) {
+    if (str.length() < prefix.length()) {
+        return false;
+    }
+    return str.compare(0, prefix.length(), prefix) == 0;
+}
+
+template <typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::istringstream iss(s);
+    std::string item;
+    while (std::getline(iss, item, delim)) {
+        *result++ = item;
+    }
+}
+
+// https://stackoverflow.com/questions/236129/how-do-i-iterate-over-the-words-of-a-string
+vector<string> split_str(const string &s, char delim) {
+    std::vector<string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
 }
