@@ -1,6 +1,6 @@
 .vscode
 *.o
-latc_x86_32
+latc_x86
 mrjp-tests-master
 playground
 latc
@@ -8,3 +8,6 @@ foo.s
 test
 test.lat
 test.s
+lattests/good/*.myout
+lattests/good/*.s
+lattests/good/

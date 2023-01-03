@@ -4,7 +4,7 @@ import subprocess
 directory = './mrjp-tests-master/good/basic'
 directory = 'lattests/good'
 
-exe = "./cpp_version/latc_x86_32"
+exe = "./cpp_version/latc_x86"
 
 file_list = os.listdir(directory)
 file_list.sort()

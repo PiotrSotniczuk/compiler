@@ -2,8 +2,7 @@ Projekt jest napisany w C++, ale w standardzie C++17!
 
 SRC
 W folderze src znajdują się pliki w których jest wiekszość logiki działania kompilatora.
-W kodzie używam elementów z folderu bnfc, używam głównie Parsera do stworzenia drzewa programu oraz
-klasy Visitor do poruszania się po tym drzewie.
+W kodzie używam elementów z folderu bnfc, używam głównie Parsera do stworzenia drzewa programu oraz klas Skeleton/Visitor do poruszania się po tym drzewie.
 
 BNFC
 Większość zawartości folderu bnfc można otrzymać wykonując w nim polecenie 'bnfc --cpp -m Instant.cf'.
@@ -12,12 +11,14 @@ więc postanowiłem załączyć pliki wygenerowane lokalnie.
 Dokonałem również małych zmian, w pliku Skeleton.C dla własnej wygody.
 
 MAKE
-Komenda 'make' najpierw tworzy pliki *.o w bibliotece w folderze bnfc, a następnie tworzy pliki *.o w folderze głównym.
-Na koniec używając wygenerowanych plików *.o kompiluje się plik wykonywalny latc, który odpowiada za frontend.
+Komenda 'make' najpierw tworzy pliki *.o w bibliotece w folderze bnfc, a następnie tworzy pliki *.o w folderze głównym oraz w lib.
+Na koniec używając wygenerowanych plików *.o kompiluje się plik wykonywalny latc, który odpowiada za frontend oraz latc_86, który odpowiada za backend.
 
 MAKE CLEAN
 Komenda 'make clean' usuwa wszystkie pliki wygenerowane przez komende make.
 
-g++ -m32 -c runtime.cpp  -o runtime.o
+PLIKI .S 
+Generowany plik assemblerowy jest dostosowany do 32 bitów i do intelowego syntaxu.
+Następnie jest on kompilowany do wykonywalnego używając takiej linijki.
+"gcc lib/runtime.o asm_file.s -no-pie -m32 -masm=intel -o exec_file"
 
-porównywanie sgtringów poprzez adres
