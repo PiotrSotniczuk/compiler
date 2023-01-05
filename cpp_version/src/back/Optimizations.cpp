@@ -13,23 +13,32 @@ string remove_redundant_lines(string in_code){
     string line = "";
     string last_line = "";    
     while (std::getline(f, line)){
-        if(last_line == "\tsub esp, 0" || last_line == "\tadd esp, 0"){
+        vector<string> split_line = split_str(line, ' ');
+        vector<string> split_last_line = split_str(last_line, ' ');
+        
+        // add and sub with 0 doesn't make sense
+        if(split_last_line.size() > 0  && 
+            (split_last_line[0] == "\tsub" || split_last_line[0] == "\tadd") &&
+            split_last_line[2] == "0"){
             last_line = line;
             continue;
         }
 
-        if(last_line == "\tpush eax" && line == "\tpop eax"){
+        // pushing and popping same register
+        if(split_last_line.size() > 0  && split_last_line[0] == "\tpush" &&
+            split_line.size() > 0 && split_line[0] == "\tpop" &&
+            split_last_line[1] == split_line[1]){
             last_line = "";
             continue;
         }
 
-        if(last_line == "\tpush 0" && line == "\tpop eax"){
-            last_line = "\txor eax, eax";
+        // xor is faster than pushing and popping 0 and only one instruction
+        if(last_line == "\tpush 0" && split_line.size() > 0 && split_line[0] == "\tpop"){
+            last_line = "\txor " + split_line[1] + ", " + split_line[1];
             continue;
         }
 
-        vector<string> split_line = split_str(line, ' ');
-        vector<string> split_last_line = split_str(last_line, ' ');
+        // instead of pushing and poping just move
         if(split_last_line.size() > 0 && split_line.size() > 0 &&
             split_last_line[0] == "\tpush" && split_line[0] == "\tpop"){    
             last_line = "\tmov " + split_line[1] + ", " + split_last_line[1];
