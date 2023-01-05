@@ -103,6 +103,57 @@ FnDef *FnDef::clone() const
 
 
 
+/********************   ClsDef    ********************/
+ClsDef::ClsDef(Ident p1, Ext *p2, ListClsDecl *p3)
+{
+  ident_ = p1;
+  ext_ = p2;
+  listclsdecl_ = p3;
+
+}
+
+ClsDef::ClsDef(const ClsDef & other)
+{
+  ident_ = other.ident_;
+  ext_ = other.ext_->clone();
+  listclsdecl_ = other.listclsdecl_->clone();
+
+}
+
+ClsDef &ClsDef::operator=(const ClsDef & other)
+{
+  ClsDef tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ClsDef::swap(ClsDef & other)
+{
+  std::swap(ident_, other.ident_);
+  std::swap(ext_, other.ext_);
+  std::swap(listclsdecl_, other.listclsdecl_);
+
+}
+
+ClsDef::~ClsDef()
+{
+  delete(ext_);
+  delete(listclsdecl_);
+
+}
+
+void ClsDef::accept(Visitor *v)
+{
+  v->visitClsDef(this);
+}
+
+ClsDef *ClsDef::clone() const
+{
+  return new ClsDef(*this);
+}
+
+
+
 /********************   Ar    ********************/
 Ar::Ar(Type *p1, Ident p2)
 {
@@ -146,6 +197,191 @@ void Ar::accept(Visitor *v)
 Ar *Ar::clone() const
 {
   return new Ar(*this);
+}
+
+
+
+/********************   NoExt    ********************/
+NoExt::NoExt()
+{
+
+}
+
+NoExt::NoExt(const NoExt & other)
+{
+
+}
+
+NoExt &NoExt::operator=(const NoExt & other)
+{
+  NoExt tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void NoExt::swap(NoExt & other)
+{
+
+}
+
+NoExt::~NoExt()
+{
+
+}
+
+void NoExt::accept(Visitor *v)
+{
+  v->visitNoExt(this);
+}
+
+NoExt *NoExt::clone() const
+{
+  return new NoExt(*this);
+}
+
+
+
+/********************   DoExt    ********************/
+DoExt::DoExt(Ident p1)
+{
+  ident_ = p1;
+
+}
+
+DoExt::DoExt(const DoExt & other)
+{
+  ident_ = other.ident_;
+
+}
+
+DoExt &DoExt::operator=(const DoExt & other)
+{
+  DoExt tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void DoExt::swap(DoExt & other)
+{
+  std::swap(ident_, other.ident_);
+
+}
+
+DoExt::~DoExt()
+{
+
+}
+
+void DoExt::accept(Visitor *v)
+{
+  v->visitDoExt(this);
+}
+
+DoExt *DoExt::clone() const
+{
+  return new DoExt(*this);
+}
+
+
+
+/********************   ClsAtr    ********************/
+ClsAtr::ClsAtr(Type *p1, Ident p2)
+{
+  type_ = p1;
+  ident_ = p2;
+
+}
+
+ClsAtr::ClsAtr(const ClsAtr & other)
+{
+  type_ = other.type_->clone();
+  ident_ = other.ident_;
+
+}
+
+ClsAtr &ClsAtr::operator=(const ClsAtr & other)
+{
+  ClsAtr tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ClsAtr::swap(ClsAtr & other)
+{
+  std::swap(type_, other.type_);
+  std::swap(ident_, other.ident_);
+
+}
+
+ClsAtr::~ClsAtr()
+{
+  delete(type_);
+
+}
+
+void ClsAtr::accept(Visitor *v)
+{
+  v->visitClsAtr(this);
+}
+
+ClsAtr *ClsAtr::clone() const
+{
+  return new ClsAtr(*this);
+}
+
+
+
+/********************   ClsFun    ********************/
+ClsFun::ClsFun(Type *p1, Ident p2, ListArg *p3, Block *p4)
+{
+  type_ = p1;
+  ident_ = p2;
+  listarg_ = p3;
+  block_ = p4;
+
+}
+
+ClsFun::ClsFun(const ClsFun & other)
+{
+  type_ = other.type_->clone();
+  ident_ = other.ident_;
+  listarg_ = other.listarg_->clone();
+  block_ = other.block_->clone();
+
+}
+
+ClsFun &ClsFun::operator=(const ClsFun & other)
+{
+  ClsFun tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ClsFun::swap(ClsFun & other)
+{
+  std::swap(type_, other.type_);
+  std::swap(ident_, other.ident_);
+  std::swap(listarg_, other.listarg_);
+  std::swap(block_, other.block_);
+
+}
+
+ClsFun::~ClsFun()
+{
+  delete(type_);
+  delete(listarg_);
+  delete(block_);
+
+}
+
+void ClsFun::accept(Visitor *v)
+{
+  v->visitClsFun(this);
+}
+
+ClsFun *ClsFun::clone() const
+{
+  return new ClsFun(*this);
 }
 
 
@@ -1033,6 +1269,49 @@ Fun *Fun::clone() const
 
 
 
+/********************   ClsType    ********************/
+ClsType::ClsType(Ident p1)
+{
+  ident_ = p1;
+
+}
+
+ClsType::ClsType(const ClsType & other)
+{
+  ident_ = other.ident_;
+
+}
+
+ClsType &ClsType::operator=(const ClsType & other)
+{
+  ClsType tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ClsType::swap(ClsType & other)
+{
+  std::swap(ident_, other.ident_);
+
+}
+
+ClsType::~ClsType()
+{
+
+}
+
+void ClsType::accept(Visitor *v)
+{
+  v->visitClsType(this);
+}
+
+ClsType *ClsType::clone() const
+{
+  return new ClsType(*this);
+}
+
+
+
 /********************   EVar    ********************/
 EVar::EVar(Ident p1)
 {
@@ -1072,6 +1351,183 @@ void EVar::accept(Visitor *v)
 EVar *EVar::clone() const
 {
   return new EVar(*this);
+}
+
+
+
+/********************   EClsAt    ********************/
+EClsAt::EClsAt(Ident p1)
+{
+  ident_ = p1;
+
+}
+
+EClsAt::EClsAt(const EClsAt & other)
+{
+  ident_ = other.ident_;
+
+}
+
+EClsAt &EClsAt::operator=(const EClsAt & other)
+{
+  EClsAt tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void EClsAt::swap(EClsAt & other)
+{
+  std::swap(ident_, other.ident_);
+
+}
+
+EClsAt::~EClsAt()
+{
+
+}
+
+void EClsAt::accept(Visitor *v)
+{
+  v->visitEClsAt(this);
+}
+
+EClsAt *EClsAt::clone() const
+{
+  return new EClsAt(*this);
+}
+
+
+
+/********************   EClsApp    ********************/
+EClsApp::EClsApp(Ident p1, ListExpr *p2)
+{
+  ident_ = p1;
+  listexpr_ = p2;
+
+}
+
+EClsApp::EClsApp(const EClsApp & other)
+{
+  ident_ = other.ident_;
+  listexpr_ = other.listexpr_->clone();
+
+}
+
+EClsApp &EClsApp::operator=(const EClsApp & other)
+{
+  EClsApp tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void EClsApp::swap(EClsApp & other)
+{
+  std::swap(ident_, other.ident_);
+  std::swap(listexpr_, other.listexpr_);
+
+}
+
+EClsApp::~EClsApp()
+{
+  delete(listexpr_);
+
+}
+
+void EClsApp::accept(Visitor *v)
+{
+  v->visitEClsApp(this);
+}
+
+EClsApp *EClsApp::clone() const
+{
+  return new EClsApp(*this);
+}
+
+
+
+/********************   NewCls    ********************/
+NewCls::NewCls(Ident p1)
+{
+  ident_ = p1;
+
+}
+
+NewCls::NewCls(const NewCls & other)
+{
+  ident_ = other.ident_;
+
+}
+
+NewCls &NewCls::operator=(const NewCls & other)
+{
+  NewCls tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void NewCls::swap(NewCls & other)
+{
+  std::swap(ident_, other.ident_);
+
+}
+
+NewCls::~NewCls()
+{
+
+}
+
+void NewCls::accept(Visitor *v)
+{
+  v->visitNewCls(this);
+}
+
+NewCls *NewCls::clone() const
+{
+  return new NewCls(*this);
+}
+
+
+
+/********************   ENull    ********************/
+ENull::ENull(Type *p1)
+{
+  type_ = p1;
+
+}
+
+ENull::ENull(const ENull & other)
+{
+  type_ = other.type_->clone();
+
+}
+
+ENull &ENull::operator=(const ENull & other)
+{
+  ENull tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ENull::swap(ENull & other)
+{
+  std::swap(type_, other.type_);
+
+}
+
+ENull::~ENull()
+{
+  delete(type_);
+
+}
+
+void ENull::accept(Visitor *v)
+{
+  v->visitENull(this);
+}
+
+ENull *ENull::clone() const
+{
+  return new ENull(*this);
 }
 
 
@@ -2095,6 +2551,20 @@ void ListArg::accept(Visitor *v)
 ListArg *ListArg::clone() const
 {
   return new ListArg(*this);
+}
+
+
+/********************   ListClsDecl    ********************/
+
+void ListClsDecl::accept(Visitor *v)
+{
+  v->visitListClsDecl(this);
+}
+
+
+ListClsDecl *ListClsDecl::clone() const
+{
+  return new ListClsDecl(*this);
 }
 
 

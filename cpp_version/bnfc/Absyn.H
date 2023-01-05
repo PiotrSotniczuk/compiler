@@ -22,6 +22,8 @@ typedef std::string Ident;
 class Program;
 class TopDef;
 class Arg;
+class Ext;
+class ClsDecl;
 class Block;
 class Stmt;
 class Item;
@@ -32,7 +34,12 @@ class MulOp;
 class RelOp;
 class Prog;
 class FnDef;
+class ClsDef;
 class Ar;
+class NoExt;
+class DoExt;
+class ClsAtr;
+class ClsFun;
 class Blk;
 class Empty;
 class BStmt;
@@ -53,7 +60,12 @@ class Str;
 class Bool;
 class Void;
 class Fun;
+class ClsType;
 class EVar;
+class EClsAt;
+class EClsApp;
+class NewCls;
+class ENull;
 class ELitInt;
 class ELitTrue;
 class ELitFalse;
@@ -79,6 +91,7 @@ class EQU;
 class NE;
 class ListTopDef;
 class ListArg;
+class ListClsDecl;
 class ListStmt;
 class ListItem;
 class ListType;
@@ -93,6 +106,8 @@ public:
   virtual void visitProgram(Program *p) = 0;
   virtual void visitTopDef(TopDef *p) = 0;
   virtual void visitArg(Arg *p) = 0;
+  virtual void visitExt(Ext *p) = 0;
+  virtual void visitClsDecl(ClsDecl *p) = 0;
   virtual void visitBlock(Block *p) = 0;
   virtual void visitStmt(Stmt *p) = 0;
   virtual void visitItem(Item *p) = 0;
@@ -103,7 +118,12 @@ public:
   virtual void visitRelOp(RelOp *p) = 0;
   virtual void visitProg(Prog *p) = 0;
   virtual void visitFnDef(FnDef *p) = 0;
+  virtual void visitClsDef(ClsDef *p) = 0;
   virtual void visitAr(Ar *p) = 0;
+  virtual void visitNoExt(NoExt *p) = 0;
+  virtual void visitDoExt(DoExt *p) = 0;
+  virtual void visitClsAtr(ClsAtr *p) = 0;
+  virtual void visitClsFun(ClsFun *p) = 0;
   virtual void visitBlk(Blk *p) = 0;
   virtual void visitEmpty(Empty *p) = 0;
   virtual void visitBStmt(BStmt *p) = 0;
@@ -124,7 +144,12 @@ public:
   virtual void visitBool(Bool *p) = 0;
   virtual void visitVoid(Void *p) = 0;
   virtual void visitFun(Fun *p) = 0;
+  virtual void visitClsType(ClsType *p) = 0;
   virtual void visitEVar(EVar *p) = 0;
+  virtual void visitEClsAt(EClsAt *p) = 0;
+  virtual void visitEClsApp(EClsApp *p) = 0;
+  virtual void visitNewCls(NewCls *p) = 0;
+  virtual void visitENull(ENull *p) = 0;
   virtual void visitELitInt(ELitInt *p) = 0;
   virtual void visitELitTrue(ELitTrue *p) = 0;
   virtual void visitELitFalse(ELitFalse *p) = 0;
@@ -150,6 +175,7 @@ public:
   virtual void visitNE(NE *p) = 0;
   virtual void visitListTopDef(ListTopDef *p) = 0;
   virtual void visitListArg(ListArg *p) = 0;
+  virtual void visitListClsDecl(ListClsDecl *p) = 0;
   virtual void visitListStmt(ListStmt *p) = 0;
   virtual void visitListItem(ListItem *p) = 0;
   virtual void visitListType(ListType *p) = 0;
@@ -193,6 +219,20 @@ class Arg : public Visitable
 {
 public:
   virtual Arg *clone() const = 0;
+  int line_number;
+};
+
+class Ext : public Visitable
+{
+public:
+  virtual Ext *clone() const = 0;
+  int line_number;
+};
+
+class ClsDecl : public Visitable
+{
+public:
+  virtual ClsDecl *clone() const = 0;
   int line_number;
 };
 
@@ -285,6 +325,22 @@ public:
   void swap(FnDef &);
 };
 
+class ClsDef : public TopDef
+{
+public:
+  Ident ident_;
+  Ext *ext_;
+  ListClsDecl *listclsdecl_;
+
+  ClsDef(const ClsDef &);
+  ClsDef &operator=(const ClsDef &);
+  ClsDef(Ident p1, Ext *p2, ListClsDecl *p3);
+  ~ClsDef();
+  virtual void accept(Visitor *v);
+  virtual ClsDef *clone() const;
+  void swap(ClsDef &);
+};
+
 class Ar : public Arg
 {
 public:
@@ -298,6 +354,65 @@ public:
   virtual void accept(Visitor *v);
   virtual Ar *clone() const;
   void swap(Ar &);
+};
+
+class NoExt : public Ext
+{
+public:
+
+  NoExt(const NoExt &);
+  NoExt &operator=(const NoExt &);
+  NoExt();
+  ~NoExt();
+  virtual void accept(Visitor *v);
+  virtual NoExt *clone() const;
+  void swap(NoExt &);
+};
+
+class DoExt : public Ext
+{
+public:
+  Ident ident_;
+
+  DoExt(const DoExt &);
+  DoExt &operator=(const DoExt &);
+  DoExt(Ident p1);
+  ~DoExt();
+  virtual void accept(Visitor *v);
+  virtual DoExt *clone() const;
+  void swap(DoExt &);
+};
+
+class ClsAtr : public ClsDecl
+{
+public:
+  Type *type_;
+  Ident ident_;
+
+  ClsAtr(const ClsAtr &);
+  ClsAtr &operator=(const ClsAtr &);
+  ClsAtr(Type *p1, Ident p2);
+  ~ClsAtr();
+  virtual void accept(Visitor *v);
+  virtual ClsAtr *clone() const;
+  void swap(ClsAtr &);
+};
+
+class ClsFun : public ClsDecl
+{
+public:
+  Type *type_;
+  Ident ident_;
+  ListArg *listarg_;
+  Block *block_;
+
+  ClsFun(const ClsFun &);
+  ClsFun &operator=(const ClsFun &);
+  ClsFun(Type *p1, Ident p2, ListArg *p3, Block *p4);
+  ~ClsFun();
+  virtual void accept(Visitor *v);
+  virtual ClsFun *clone() const;
+  void swap(ClsFun &);
 };
 
 class Blk : public Block
@@ -582,6 +697,20 @@ public:
   void swap(Fun &);
 };
 
+class ClsType : public Type
+{
+public:
+  Ident ident_;
+
+  ClsType(const ClsType &);
+  ClsType &operator=(const ClsType &);
+  ClsType(Ident p1);
+  ~ClsType();
+  virtual void accept(Visitor *v);
+  virtual ClsType *clone() const;
+  void swap(ClsType &);
+};
+
 class EVar : public Expr
 {
 public:
@@ -594,6 +723,63 @@ public:
   virtual void accept(Visitor *v);
   virtual EVar *clone() const;
   void swap(EVar &);
+};
+
+class EClsAt : public Expr
+{
+public:
+  Ident ident_;
+
+  EClsAt(const EClsAt &);
+  EClsAt &operator=(const EClsAt &);
+  EClsAt(Ident p1);
+  ~EClsAt();
+  virtual void accept(Visitor *v);
+  virtual EClsAt *clone() const;
+  void swap(EClsAt &);
+};
+
+class EClsApp : public Expr
+{
+public:
+  Ident ident_;
+  ListExpr *listexpr_;
+
+  EClsApp(const EClsApp &);
+  EClsApp &operator=(const EClsApp &);
+  EClsApp(Ident p1, ListExpr *p2);
+  ~EClsApp();
+  virtual void accept(Visitor *v);
+  virtual EClsApp *clone() const;
+  void swap(EClsApp &);
+};
+
+class NewCls : public Expr
+{
+public:
+  Ident ident_;
+
+  NewCls(const NewCls &);
+  NewCls &operator=(const NewCls &);
+  NewCls(Ident p1);
+  ~NewCls();
+  virtual void accept(Visitor *v);
+  virtual NewCls *clone() const;
+  void swap(NewCls &);
+};
+
+class ENull : public Expr
+{
+public:
+  Type *type_;
+
+  ENull(const ENull &);
+  ENull &operator=(const ENull &);
+  ENull(Type *p1);
+  ~ENull();
+  virtual void accept(Visitor *v);
+  virtual ENull *clone() const;
+  void swap(ENull &);
 };
 
 class ELitInt : public Expr
@@ -928,6 +1114,13 @@ class ListArg : public Visitable, public std::vector<Arg*>
 public:
   virtual void accept(Visitor *v);
   virtual ListArg *clone() const;
+};
+
+class ListClsDecl : public Visitable, public std::vector<ClsDecl*>
+{
+public:
+  virtual void accept(Visitor *v);
+  virtual ListClsDecl *clone() const;
 };
 
 class ListStmt : public Visitable, public std::vector<Stmt*>

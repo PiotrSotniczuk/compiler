@@ -6,11 +6,25 @@ Prog.   Program ::= [TopDef] ;
 
 FnDef.	   TopDef ::= Type Ident "(" [Arg] ")" Block ;
 
+ClsDef.    TopDef ::= "class" Ident Ext "{" [ClsDecl] "}" ;
+
 separator nonempty TopDef "" ;
 
 Ar. 	   Arg ::= Type Ident;
 
 separator  Arg "," ;
+
+-- classes --------------------------------
+
+NoExt.     Ext ::= ;
+
+DoExt.     Ext ::= ":" Ident ;
+
+ClsAtr.    ClsDecl ::= Type Ident ";";
+
+ClsFun.    ClsDecl ::= Type Ident "(" [Arg] ")" Block ;
+
+separator  ClsDecl "" ;
 
 -- statements ----------------------------------------------
 
@@ -60,11 +74,23 @@ Void.      Type ::= "void" ;
 
 internal   Fun. Type ::= Type "(" [Type] ")" ;
 
+ClsType.   Type ::= Ident ;
+
 separator  Type "," ;
 
 -- Expressions ---------------------------------------------
 
-EVar.      Expr6 ::= Ident ;
+-- TODO tutaj dodaj
+
+EVar.      Expr8 ::= Ident ;
+
+EClsAt.    Expr7 ::= "." Ident ;
+
+EClsApp.   Expr7 ::= "." Ident "(" [Expr] ")" ;
+
+NewCls.    Expr7 ::= "new" Ident ;
+
+ENull.     Expr6 ::= "(" Type ")" "null";
 
 ELitInt.   Expr6 ::= Integer ;
 

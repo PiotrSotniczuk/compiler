@@ -11,6 +11,8 @@ public:
   void visitProgram(Program *p);
   void visitTopDef(TopDef *p);
   void visitArg(Arg *p);
+  void visitExt(Ext *p);
+  void visitClsDecl(ClsDecl *p);
   void visitBlock(Block *p);
   void visitStmt(Stmt *p);
   void visitItem(Item *p);
@@ -21,7 +23,12 @@ public:
   void visitRelOp(RelOp *p);
   void visitProg(Prog *p);
   void visitFnDef(FnDef *p);
+  void visitClsDef(ClsDef *p);
   void visitAr(Ar *p);
+  void visitNoExt(NoExt *p);
+  void visitDoExt(DoExt *p);
+  void visitClsAtr(ClsAtr *p);
+  void visitClsFun(ClsFun *p);
   void visitBlk(Blk *p);
   void visitEmpty(Empty *p);
   void visitBStmt(BStmt *p);
@@ -42,7 +49,12 @@ public:
   void visitBool(Bool *p);
   void visitVoid(Void *p);
   void visitFun(Fun *p);
+  void visitClsType(ClsType *p);
   void visitEVar(EVar *p);
+  void visitEClsAt(EClsAt *p);
+  void visitEClsApp(EClsApp *p);
+  void visitNewCls(NewCls *p);
+  void visitENull(ENull *p);
   void visitELitInt(ELitInt *p);
   void visitELitTrue(ELitTrue *p);
   void visitELitFalse(ELitFalse *p);
@@ -68,6 +80,7 @@ public:
   void visitNE(NE *p);
   void visitListTopDef(ListTopDef *p);
   void visitListArg(ListArg *p);
+  void visitListClsDecl(ListClsDecl *p);
   void visitListStmt(ListStmt *p);
   void visitListItem(ListItem *p);
   void visitListType(ListType *p);

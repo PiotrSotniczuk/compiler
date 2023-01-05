@@ -33,10 +33,18 @@ class PrintAbsyn : public Visitor
   void visitProg(Prog *p);
   void visitTopDef(TopDef *p); /* abstract class */
   void visitFnDef(FnDef *p);
+  void visitClsDef(ClsDef *p);
   void visitListTopDef(ListTopDef *p);
   void visitArg(Arg *p); /* abstract class */
   void visitAr(Ar *p);
   void visitListArg(ListArg *p);
+  void visitExt(Ext *p); /* abstract class */
+  void visitNoExt(NoExt *p);
+  void visitDoExt(DoExt *p);
+  void visitClsDecl(ClsDecl *p); /* abstract class */
+  void visitClsAtr(ClsAtr *p);
+  void visitClsFun(ClsFun *p);
+  void visitListClsDecl(ListClsDecl *p);
   void visitBlock(Block *p); /* abstract class */
   void visitBlk(Blk *p);
   void visitListStmt(ListStmt *p);
@@ -63,9 +71,14 @@ class PrintAbsyn : public Visitor
   void visitBool(Bool *p);
   void visitVoid(Void *p);
   void visitFun(Fun *p);
+  void visitClsType(ClsType *p);
   void visitListType(ListType *p);
   void visitExpr(Expr *p); /* abstract class */
   void visitEVar(EVar *p);
+  void visitEClsAt(EClsAt *p);
+  void visitEClsApp(EClsApp *p);
+  void visitNewCls(NewCls *p);
+  void visitENull(ENull *p);
   void visitELitInt(ELitInt *p);
   void visitELitTrue(ELitTrue *p);
   void visitELitFalse(ELitFalse *p);
@@ -179,10 +192,18 @@ class ShowAbsyn : public Visitor
   void visitProg(Prog *p);
   void visitTopDef(TopDef *p); /* abstract class */
   void visitFnDef(FnDef *p);
+  void visitClsDef(ClsDef *p);
   void visitListTopDef(ListTopDef *p);
   void visitArg(Arg *p); /* abstract class */
   void visitAr(Ar *p);
   void visitListArg(ListArg *p);
+  void visitExt(Ext *p); /* abstract class */
+  void visitNoExt(NoExt *p);
+  void visitDoExt(DoExt *p);
+  void visitClsDecl(ClsDecl *p); /* abstract class */
+  void visitClsAtr(ClsAtr *p);
+  void visitClsFun(ClsFun *p);
+  void visitListClsDecl(ListClsDecl *p);
   void visitBlock(Block *p); /* abstract class */
   void visitBlk(Blk *p);
   void visitListStmt(ListStmt *p);
@@ -209,9 +230,14 @@ class ShowAbsyn : public Visitor
   void visitBool(Bool *p);
   void visitVoid(Void *p);
   void visitFun(Fun *p);
+  void visitClsType(ClsType *p);
   void visitListType(ListType *p);
   void visitExpr(Expr *p); /* abstract class */
   void visitEVar(EVar *p);
+  void visitEClsAt(EClsAt *p);
+  void visitEClsApp(EClsApp *p);
+  void visitNewCls(NewCls *p);
+  void visitENull(ENull *p);
   void visitELitInt(ELitInt *p);
   void visitELitTrue(ELitTrue *p);
   void visitELitFalse(ELitFalse *p);

@@ -146,6 +146,23 @@ void PrintAbsyn::visitFnDef(FnDef *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitClsDef(ClsDef *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  render("class");
+  visitIdent(p->ident_);
+  _i_ = 0; p->ext_->accept(this);
+  render('{');
+  if(p->listclsdecl_) {_i_ = 0; p->listclsdecl_->accept(this);}
+  render('}');
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitListTopDef(ListTopDef *listtopdef)
 {
   for (ListTopDef::const_iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
@@ -174,6 +191,72 @@ void PrintAbsyn::visitListArg(ListArg *listarg)
   {
     (*i)->accept(this);
     if (i != listarg->end() - 1) render(',');
+  }
+}void PrintAbsyn::visitExt(Ext *p) {} //abstract class
+
+void PrintAbsyn::visitNoExt(NoExt *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitDoExt(DoExt *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  render(':');
+  visitIdent(p->ident_);
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitClsDecl(ClsDecl *p) {} //abstract class
+
+void PrintAbsyn::visitClsAtr(ClsAtr *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  _i_ = 0; p->type_->accept(this);
+  visitIdent(p->ident_);
+  render(';');
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitClsFun(ClsFun *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  _i_ = 0; p->type_->accept(this);
+  visitIdent(p->ident_);
+  render('(');
+  if(p->listarg_) {_i_ = 0; p->listarg_->accept(this);}
+  render(')');
+  _i_ = 0; p->block_->accept(this);
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitListClsDecl(ListClsDecl *listclsdecl)
+{
+  for (ListClsDecl::const_iterator i = listclsdecl->begin() ; i != listclsdecl->end() ; ++i)
+  {
+    (*i)->accept(this);
+    render("");
   }
 }void PrintAbsyn::visitBlock(Block *p) {} //abstract class
 
@@ -473,6 +556,18 @@ void PrintAbsyn::visitFun(Fun *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitClsType(ClsType *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  visitIdent(p->ident_);
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitListType(ListType *listtype)
 {
   for (ListType::const_iterator i = listtype->begin() ; i != listtype->end() ; ++i)
@@ -485,9 +580,66 @@ void PrintAbsyn::visitListType(ListType *listtype)
 void PrintAbsyn::visitEVar(EVar *p)
 {
   int oldi = _i_;
-  if (oldi > 6) render(_L_PAREN);
+  if (oldi > 8) render(_L_PAREN);
 
   visitIdent(p->ident_);
+
+  if (oldi > 8) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitEClsAt(EClsAt *p)
+{
+  int oldi = _i_;
+  if (oldi > 7) render(_L_PAREN);
+
+  render('.');
+  visitIdent(p->ident_);
+
+  if (oldi > 7) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitEClsApp(EClsApp *p)
+{
+  int oldi = _i_;
+  if (oldi > 7) render(_L_PAREN);
+
+  render('.');
+  visitIdent(p->ident_);
+  render('(');
+  if(p->listexpr_) {_i_ = 0; p->listexpr_->accept(this);}
+  render(')');
+
+  if (oldi > 7) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitNewCls(NewCls *p)
+{
+  int oldi = _i_;
+  if (oldi > 7) render(_L_PAREN);
+
+  render("new");
+  visitIdent(p->ident_);
+
+  if (oldi > 7) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitENull(ENull *p)
+{
+  int oldi = _i_;
+  if (oldi > 6) render(_L_PAREN);
+
+  render('(');
+  _i_ = 0; p->type_->accept(this);
+  render(')');
+  render("null");
 
   if (oldi > 6) render(_R_PAREN);
 
@@ -882,6 +1034,23 @@ void ShowAbsyn::visitFnDef(FnDef *p)
   bufAppend(']');
   bufAppend(')');
 }
+void ShowAbsyn::visitClsDef(ClsDef *p)
+{
+  bufAppend('(');
+  bufAppend("ClsDef");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->ext_)  p->ext_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->listclsdecl_)  p->listclsdecl_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  bufAppend(')');
+}
 void ShowAbsyn::visitListTopDef(ListTopDef *listtopdef)
 {
   for (ListTopDef::const_iterator i = listtopdef->begin() ; i != listtopdef->end() ; ++i)
@@ -911,6 +1080,64 @@ void ShowAbsyn::visitListArg(ListArg *listarg)
   {
     (*i)->accept(this);
     if (i != listarg->end() - 1) bufAppend(", ");
+  }
+}
+
+void ShowAbsyn::visitExt(Ext *p) {} //abstract class
+
+void ShowAbsyn::visitNoExt(NoExt *p)
+{
+  bufAppend("NoExt");
+}
+void ShowAbsyn::visitDoExt(DoExt *p)
+{
+  bufAppend('(');
+  bufAppend("DoExt");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitClsDecl(ClsDecl *p) {} //abstract class
+
+void ShowAbsyn::visitClsAtr(ClsAtr *p)
+{
+  bufAppend('(');
+  bufAppend("ClsAtr");
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->type_)  p->type_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  bufAppend(')');
+}
+void ShowAbsyn::visitClsFun(ClsFun *p)
+{
+  bufAppend('(');
+  bufAppend("ClsFun");
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->type_)  p->type_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->listarg_)  p->listarg_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->block_)  p->block_->accept(this);
+  bufAppend(']');
+  bufAppend(')');
+}
+void ShowAbsyn::visitListClsDecl(ListClsDecl *listclsdecl)
+{
+  for (ListClsDecl::const_iterator i = listclsdecl->begin() ; i != listclsdecl->end() ; ++i)
+  {
+    (*i)->accept(this);
+    if (i != listclsdecl->end() - 1) bufAppend(", ");
   }
 }
 
@@ -1132,6 +1359,14 @@ void ShowAbsyn::visitFun(Fun *p)
   bufAppend(' ');
   bufAppend(')');
 }
+void ShowAbsyn::visitClsType(ClsType *p)
+{
+  bufAppend('(');
+  bufAppend("ClsType");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(')');
+}
 void ShowAbsyn::visitListType(ListType *listtype)
 {
   for (ListType::const_iterator i = listtype->begin() ; i != listtype->end() ; ++i)
@@ -1149,6 +1384,46 @@ void ShowAbsyn::visitEVar(EVar *p)
   bufAppend("EVar");
   bufAppend(' ');
   visitIdent(p->ident_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitEClsAt(EClsAt *p)
+{
+  bufAppend('(');
+  bufAppend("EClsAt");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitEClsApp(EClsApp *p)
+{
+  bufAppend('(');
+  bufAppend("EClsApp");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->listexpr_)  p->listexpr_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  bufAppend(')');
+}
+void ShowAbsyn::visitNewCls(NewCls *p)
+{
+  bufAppend('(');
+  bufAppend("NewCls");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(')');
+}
+void ShowAbsyn::visitENull(ENull *p)
+{
+  bufAppend('(');
+  bufAppend("ENull");
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->type_)  p->type_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
   bufAppend(')');
 }
 void ShowAbsyn::visitELitInt(ELitInt *p)
