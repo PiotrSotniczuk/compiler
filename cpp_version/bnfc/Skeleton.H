@@ -48,8 +48,8 @@ public:
   void visitStr(Str *p);
   void visitBool(Bool *p);
   void visitVoid(Void *p);
-  void visitFun(Fun *p);
   void visitClsType(ClsType *p);
+  void visitFun(Fun *p);
   void visitEVar(EVar *p);
   void visitEClsAt(EClsAt *p);
   void visitEClsApp(EClsApp *p);

@@ -59,8 +59,8 @@ class Int;
 class Str;
 class Bool;
 class Void;
-class Fun;
 class ClsType;
+class Fun;
 class EVar;
 class EClsAt;
 class EClsApp;
@@ -143,8 +143,8 @@ public:
   virtual void visitStr(Str *p) = 0;
   virtual void visitBool(Bool *p) = 0;
   virtual void visitVoid(Void *p) = 0;
-  virtual void visitFun(Fun *p) = 0;
   virtual void visitClsType(ClsType *p) = 0;
+  virtual void visitFun(Fun *p) = 0;
   virtual void visitEVar(EVar *p) = 0;
   virtual void visitEClsAt(EClsAt *p) = 0;
   virtual void visitEClsApp(EClsApp *p) = 0;
@@ -682,6 +682,20 @@ public:
   void swap(Void &);
 };
 
+class ClsType : public Type
+{
+public:
+  Ident ident_;
+
+  ClsType(const ClsType &);
+  ClsType &operator=(const ClsType &);
+  ClsType(Ident p1);
+  ~ClsType();
+  virtual void accept(Visitor *v);
+  virtual ClsType *clone() const;
+  void swap(ClsType &);
+};
+
 class Fun : public Type
 {
 public:
@@ -695,20 +709,6 @@ public:
   virtual void accept(Visitor *v);
   virtual Fun *clone() const;
   void swap(Fun &);
-};
-
-class ClsType : public Type
-{
-public:
-  Ident ident_;
-
-  ClsType(const ClsType &);
-  ClsType &operator=(const ClsType &);
-  ClsType(Ident p1);
-  ~ClsType();
-  virtual void accept(Visitor *v);
-  virtual ClsType *clone() const;
-  void swap(ClsType &);
 };
 
 class EVar : public Expr
@@ -728,11 +728,12 @@ public:
 class EClsAt : public Expr
 {
 public:
+  Expr *expr_;
   Ident ident_;
 
   EClsAt(const EClsAt &);
   EClsAt &operator=(const EClsAt &);
-  EClsAt(Ident p1);
+  EClsAt(Expr *p1, Ident p2);
   ~EClsAt();
   virtual void accept(Visitor *v);
   virtual EClsAt *clone() const;
@@ -742,12 +743,13 @@ public:
 class EClsApp : public Expr
 {
 public:
+  Expr *expr_;
   Ident ident_;
   ListExpr *listexpr_;
 
   EClsApp(const EClsApp &);
   EClsApp &operator=(const EClsApp &);
-  EClsApp(Ident p1, ListExpr *p2);
+  EClsApp(Expr *p1, Ident p2, ListExpr *p3);
   ~EClsApp();
   virtual void accept(Visitor *v);
   virtual EClsApp *clone() const;

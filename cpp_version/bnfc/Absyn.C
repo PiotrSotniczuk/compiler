@@ -1221,6 +1221,49 @@ Void *Void::clone() const
 
 
 
+/********************   ClsType    ********************/
+ClsType::ClsType(Ident p1)
+{
+  ident_ = p1;
+
+}
+
+ClsType::ClsType(const ClsType & other)
+{
+  ident_ = other.ident_;
+
+}
+
+ClsType &ClsType::operator=(const ClsType & other)
+{
+  ClsType tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void ClsType::swap(ClsType & other)
+{
+  std::swap(ident_, other.ident_);
+
+}
+
+ClsType::~ClsType()
+{
+
+}
+
+void ClsType::accept(Visitor *v)
+{
+  v->visitClsType(this);
+}
+
+ClsType *ClsType::clone() const
+{
+  return new ClsType(*this);
+}
+
+
+
 /********************   Fun    ********************/
 Fun::Fun(Type *p1, ListType *p2)
 {
@@ -1269,49 +1312,6 @@ Fun *Fun::clone() const
 
 
 
-/********************   ClsType    ********************/
-ClsType::ClsType(Ident p1)
-{
-  ident_ = p1;
-
-}
-
-ClsType::ClsType(const ClsType & other)
-{
-  ident_ = other.ident_;
-
-}
-
-ClsType &ClsType::operator=(const ClsType & other)
-{
-  ClsType tmp(other);
-  swap(tmp);
-  return *this;
-}
-
-void ClsType::swap(ClsType & other)
-{
-  std::swap(ident_, other.ident_);
-
-}
-
-ClsType::~ClsType()
-{
-
-}
-
-void ClsType::accept(Visitor *v)
-{
-  v->visitClsType(this);
-}
-
-ClsType *ClsType::clone() const
-{
-  return new ClsType(*this);
-}
-
-
-
 /********************   EVar    ********************/
 EVar::EVar(Ident p1)
 {
@@ -1356,14 +1356,16 @@ EVar *EVar::clone() const
 
 
 /********************   EClsAt    ********************/
-EClsAt::EClsAt(Ident p1)
+EClsAt::EClsAt(Expr *p1, Ident p2)
 {
-  ident_ = p1;
+  expr_ = p1;
+  ident_ = p2;
 
 }
 
 EClsAt::EClsAt(const EClsAt & other)
 {
+  expr_ = other.expr_->clone();
   ident_ = other.ident_;
 
 }
@@ -1377,12 +1379,14 @@ EClsAt &EClsAt::operator=(const EClsAt & other)
 
 void EClsAt::swap(EClsAt & other)
 {
+  std::swap(expr_, other.expr_);
   std::swap(ident_, other.ident_);
 
 }
 
 EClsAt::~EClsAt()
 {
+  delete(expr_);
 
 }
 
@@ -1399,15 +1403,17 @@ EClsAt *EClsAt::clone() const
 
 
 /********************   EClsApp    ********************/
-EClsApp::EClsApp(Ident p1, ListExpr *p2)
+EClsApp::EClsApp(Expr *p1, Ident p2, ListExpr *p3)
 {
-  ident_ = p1;
-  listexpr_ = p2;
+  expr_ = p1;
+  ident_ = p2;
+  listexpr_ = p3;
 
 }
 
 EClsApp::EClsApp(const EClsApp & other)
 {
+  expr_ = other.expr_->clone();
   ident_ = other.ident_;
   listexpr_ = other.listexpr_->clone();
 
@@ -1422,6 +1428,7 @@ EClsApp &EClsApp::operator=(const EClsApp & other)
 
 void EClsApp::swap(EClsApp & other)
 {
+  std::swap(expr_, other.expr_);
   std::swap(ident_, other.ident_);
   std::swap(listexpr_, other.listexpr_);
 
@@ -1429,6 +1436,7 @@ void EClsApp::swap(EClsApp & other)
 
 EClsApp::~EClsApp()
 {
+  delete(expr_);
   delete(listexpr_);
 
 }

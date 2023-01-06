@@ -72,21 +72,19 @@ Bool.      Type ::= "boolean" ;
 
 Void.      Type ::= "void" ;
 
-internal   Fun. Type ::= Type "(" [Type] ")" ;
-
 ClsType.   Type ::= Ident ;
+
+internal   Fun. Type ::= Type "(" [Type] ")" ;
 
 separator  Type "," ;
 
 -- Expressions ---------------------------------------------
 
--- TODO tutaj dodaj
-
 EVar.      Expr8 ::= Ident ;
 
-EClsAt.    Expr7 ::= "." Ident ;
+EClsAt.    Expr7 ::= Expr7 "." Ident ;
 
-EClsApp.   Expr7 ::= "." Ident "(" [Expr] ")" ;
+EClsApp.   Expr7 ::= Expr7 "." Ident "(" [Expr] ")" ;
 
 NewCls.    Expr7 ::= "new" Ident ;
 
@@ -116,7 +114,7 @@ EAnd.      Expr1 ::= Expr2 "&&" Expr1 ;
 
 EOr.       Expr ::= Expr1 "||" Expr ;
 
-coercions  Expr 6 ;
+coercions  Expr 8 ;
 
 separator  Expr "," ;
 

@@ -70,8 +70,8 @@ class PrintAbsyn : public Visitor
   void visitStr(Str *p);
   void visitBool(Bool *p);
   void visitVoid(Void *p);
-  void visitFun(Fun *p);
   void visitClsType(ClsType *p);
+  void visitFun(Fun *p);
   void visitListType(ListType *p);
   void visitExpr(Expr *p); /* abstract class */
   void visitEVar(EVar *p);
@@ -229,8 +229,8 @@ class ShowAbsyn : public Visitor
   void visitStr(Str *p);
   void visitBool(Bool *p);
   void visitVoid(Void *p);
-  void visitFun(Fun *p);
   void visitClsType(ClsType *p);
+  void visitFun(Fun *p);
   void visitListType(ListType *p);
   void visitExpr(Expr *p); /* abstract class */
   void visitEVar(EVar *p);

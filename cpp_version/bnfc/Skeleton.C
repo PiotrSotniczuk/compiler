@@ -241,7 +241,16 @@ void Skeleton::visitBool(__attribute__((unused)) Bool *bool_)
 
 void Skeleton::visitVoid(__attribute__((unused)) Void *void_)
 {
+  /* Code For Void Goes Here */
   this->last_type = "void";
+}
+
+void Skeleton::visitClsType(ClsType *cls_type)
+{
+  /* Code For ClsType Goes Here */
+
+  visitIdent(cls_type->ident_);
+
 }
 
 void Skeleton::visitFun(Fun *fun)
@@ -266,11 +275,19 @@ void Skeleton::visitListType(ListType *list_type)
   this->last_type = all + ")";
 }
 
+void Skeleton::visitEVar(EVar *e_var)
+{
+  /* Code For EVar Goes Here */
+
+  visitIdent(e_var->ident_);
+
+}
 
 void Skeleton::visitEClsAt(EClsAt *e_cls_at)
 {
   /* Code For EClsAt Goes Here */
 
+  e_cls_at->expr_->accept(this);
   visitIdent(e_cls_at->ident_);
 
 }
@@ -279,6 +296,7 @@ void Skeleton::visitEClsApp(EClsApp *e_cls_app)
 {
   /* Code For EClsApp Goes Here */
 
+  e_cls_app->expr_->accept(this);
   visitIdent(e_cls_app->ident_);
   e_cls_app->listexpr_->accept(this);
 

@@ -539,6 +539,18 @@ void PrintAbsyn::visitVoid(Void *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitClsType(ClsType *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  visitIdent(p->ident_);
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitFun(Fun *p)
 {
   int oldi = _i_;
@@ -550,18 +562,6 @@ void PrintAbsyn::visitFun(Fun *p)
   render('(');
   if(p->listtype_) {_i_ = 0; p->listtype_->accept(this);}
   render(')');
-
-  if (oldi > 0) render(_R_PAREN);
-
-  _i_ = oldi;
-}
-
-void PrintAbsyn::visitClsType(ClsType *p)
-{
-  int oldi = _i_;
-  if (oldi > 0) render(_L_PAREN);
-
-  visitIdent(p->ident_);
 
   if (oldi > 0) render(_R_PAREN);
 
@@ -594,6 +594,7 @@ void PrintAbsyn::visitEClsAt(EClsAt *p)
   int oldi = _i_;
   if (oldi > 7) render(_L_PAREN);
 
+  _i_ = 7; p->expr_->accept(this);
   render('.');
   visitIdent(p->ident_);
 
@@ -607,6 +608,7 @@ void PrintAbsyn::visitEClsApp(EClsApp *p)
   int oldi = _i_;
   if (oldi > 7) render(_L_PAREN);
 
+  _i_ = 7; p->expr_->accept(this);
   render('.');
   visitIdent(p->ident_);
   render('(');
@@ -1342,6 +1344,14 @@ void ShowAbsyn::visitVoid(Void *p)
 {
   bufAppend("Void");
 }
+void ShowAbsyn::visitClsType(ClsType *p)
+{
+  bufAppend('(');
+  bufAppend("ClsType");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(')');
+}
 void ShowAbsyn::visitFun(Fun *p)
 {
   bufAppend('(');
@@ -1357,14 +1367,6 @@ void ShowAbsyn::visitFun(Fun *p)
   if (p->listtype_)  p->listtype_->accept(this);
   bufAppend(']');
   bufAppend(' ');
-  bufAppend(')');
-}
-void ShowAbsyn::visitClsType(ClsType *p)
-{
-  bufAppend('(');
-  bufAppend("ClsType");
-  bufAppend(' ');
-  visitIdent(p->ident_);
   bufAppend(')');
 }
 void ShowAbsyn::visitListType(ListType *listtype)
@@ -1391,6 +1393,10 @@ void ShowAbsyn::visitEClsAt(EClsAt *p)
   bufAppend('(');
   bufAppend("EClsAt");
   bufAppend(' ');
+  bufAppend('[');
+  if (p->expr_)  p->expr_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
   visitIdent(p->ident_);
   bufAppend(')');
 }
@@ -1398,6 +1404,10 @@ void ShowAbsyn::visitEClsApp(EClsApp *p)
 {
   bufAppend('(');
   bufAppend("EClsApp");
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->expr_)  p->expr_->accept(this);
+  bufAppend(']');
   bufAppend(' ');
   visitIdent(p->ident_);
   bufAppend(' ');
