@@ -76,7 +76,7 @@ void Compiler::visitEMul(EMul *e_mul){
     Times* op_times = dynamic_cast<Times*>(e_mul->mulop_);
     if(op_times){
         this->act_code += add_t_n({
-            "pop eax", "imul dword ptr [esp]", "push eax"
+            "pop eax", "pop ecx", "imul ecx", "push eax"
         });
         return;
     }
@@ -282,8 +282,8 @@ void Compiler::visitERel(ERel *e_rel){
 
     // compare values from stack and set value depending on flags
     this->act_code += add_t_n({
-        "pop ecx", "xor eax, eax", "cmp dword ptr [esp], ecx",
-        "set" + op + " al", "push eax"
+        "pop ecx", "xor eax, eax", "mov edx, 1", "cmp dword ptr [esp], ecx",
+        "cmov" + op + " eax, edx", "push eax"
     });
 }
 
