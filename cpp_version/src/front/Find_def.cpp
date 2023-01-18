@@ -42,6 +42,66 @@ void FindDef::visitAr(Ar *ar)
   this->fun_args.emplace(ar->ident_);
 }
 
+void FindDef::visitClsDef(ClsDef *cls_def)
+{
+  visitIdent(cls_def->ident_);
+  string name = cls_def->ident_;
+  Klass new_class = Klass();
+  
+  DoExt* ext = dynamic_cast<DoExt*>(cls_def->ext_);
+  if(ext){
+    auto base_class = this->classes.find(ext->ident_);
+    if(base_class == this->classes.end()){
+      go_error(cls_def->line_number, "Base Class " + ext->ident_ + " was not declared");
+    }
+    map<string, pair<string, int>> base_attrs(base_class->second.attrs);
+    new_class.attrs = base_attrs;
+    new_class.size = base_class->second.size;
+
+    map<string, tuple<string, string, vector<string>, int>> base_vtab(base_class->second.vtab);
+    new_class.vtab = base_vtab;
+  }
+
+  auto iter = cls_def->listclsdecl_->begin();
+  auto end = cls_def->listclsdecl_->end();
+  for(; iter < end; iter++){
+    ClsAtr* atr = dynamic_cast<ClsAtr*>(*iter);
+    if(atr){
+      atr->type_->accept(this);
+      auto to_insert = make_pair(name + "_" + atr->ident_, make_pair(this->last_type, new_class.size));
+      new_class.size++;
+      if(!new_class.attrs.emplace(to_insert).second){
+        go_error(atr->line_number, "Attribute " + atr->ident_ + " was already declared in this class");
+      }
+    }
+
+    ClsFun* fun = dynamic_cast<ClsFun*>(*iter);
+    if(fun){
+      fun->type_->accept(this);
+      string ret_type = this->last_type;
+
+      vector<string> arg_vec = vector<string>();
+      auto iter = fun->listarg_->begin();
+      auto end = fun->listarg_->end();
+      for(; iter < end; iter++){
+        Ar* ar = dynamic_cast<Ar*>(*iter);
+        ar->type_->accept(this);
+        arg_vec.emplace_back(this->last_type);
+      }
+
+      int fun_offset = new_class.vtab.size();
+      auto to_insert = make_pair(fun->ident_, make_tuple(name, ret_type, arg_vec, fun_offset));
+      
+
+      // if(!new_class.vtab.emplace(to_insert).second){
+      //   go_error(fun->line_number, "Attribute " + atr->ident_ + " was already declared in this class");
+      // }
+    }
+  }
+
+  this->classes.emplace(make_pair(name, new_class));    
+}
+
 void CheckReturn::visitFnDef(FnDef *fn_def)
 {
   this->there_is_return = false;

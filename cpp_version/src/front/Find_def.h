@@ -9,9 +9,26 @@
 
 using namespace std;
 
+class Klass {
+    public:
+        int size;
+        // name <type, offset>
+        map<string, pair<string, int>> attrs;
+// function table: name, class, ret_type, args[type]
+        map<string, tuple<string, string, vector<string>, int>> vtab;
+        Klass(void){
+            size = 1;
+            attrs = map<string, pair<string, int>>();
+            vtab = map<string, tuple<string, string, vector<string>, int>>();
+        }
+};
+
 class FindDef : public Skeleton {
     public:
         map<string, pair<string, vector<string>>> funs;
+
+        // classname,        pola i typy       nazwa funkcji, typy argumenty
+        map<string, Klass> classes;
         int main_line;
         FindDef(void){
             funs = map<string, pair<string, vector<string>>>();
@@ -22,6 +39,7 @@ class FindDef : public Skeleton {
             funs.emplace(make_pair( "readString", make_pair("string", vector<string>())));
             arg_types = vector<string>();
             fun_args = set<string>();
+            classes = map<string, Klass>();
             main_line = 0;
         };
     private:
@@ -30,6 +48,7 @@ class FindDef : public Skeleton {
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitListArg(ListArg *list_arg);
         virtual void visitAr(Ar *ar);
+        virtual void visitClsDef(ClsDef *cls_def);
 };
 
 class CheckReturn : public Skeleton {
