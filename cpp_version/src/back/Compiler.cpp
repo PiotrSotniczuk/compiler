@@ -281,9 +281,11 @@ void Compiler::visitERel(ERel *e_rel){
     if(dynamic_cast<NE*>(e_rel->relop_)){op = "ne";}
 
     // compare values from stack and set value depending on flags
+    int c = this->get_l_count();
     this->act_code += add_t_n({
-        "pop ecx", "xor eax, eax", "mov edx, 1", "cmp dword ptr [esp], ecx",
-        "cmov" + op + " eax, edx", "push eax"
+        "pop ecx", "pop eax", "push 1", "cmp eax, ecx", 
+        "j" + op + " _rel_end" + to_string(c), "mov dword ptr [esp], 0", 
+        "_rel_end" + to_string(c) + ":"
     });
 }
 

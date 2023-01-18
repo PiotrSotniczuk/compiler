@@ -5,20 +5,20 @@ BNFC_FILES=bnfc/Absyn.o bnfc/Lexer.o bnfc/Parser.o bnfc/Skeleton.o
 TYPE_CHECKER=Type_checker.o
 FIND_DEF=Find_def.o
 SHARED=Shared.o
-FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF} ${SHARED}
+FRONT_LIBS=${TYPE_CHECKER} ${FIND_DEF}  ${COMPILER} ${OPTIMS} ${SHARED}
 RUNTIME=lib/runtime.o
 COMPILER=Compiler.o
 OPTIMS=optims.o
-BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${SHARED} ${OPTIMS}
+BACK_LIBS=${BNFC_FILES} ${COMPILER} ${FIND_DEF} ${OPTIMS} ${SHARED}
 
 all: latc latc_x86
 
 latc: ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp
-	@echo "Compiling LatteFront..."
+	@echo "Compiling LatteCompiler..."
 	${CC} ${CCFLAGS} ${BNFC_FILES} ${FRONT_LIBS} src/front/Latte.cpp -o latc
 
 latc_x86: ${RUNTIME} src/back/Back.cpp ${BACK_LIBS}
-	@echo "Compiling LatteBack..."
+	@echo "Compiling LatteBackend..."
 	${CC} ${CCFLAGS} ${BACK_LIBS} src/back/Back.cpp -o latc_x86
 
 ${TYPE_CHECKER}: src/front/Type_checker.cpp
@@ -27,7 +27,7 @@ ${TYPE_CHECKER}: src/front/Type_checker.cpp
 ${FIND_DEF}: src/front/Find_def.cpp
 	${CC} ${CCFLAGS} -c src/front/Find_def.cpp -o ${FIND_DEF}
 
-${SHARED}: src/Shared.cpp
+${SHARED}: src/Shared.cpp 
 	${CC} ${CCFLAGS} -c src/Shared.cpp -o ${SHARED}
 
 ${COMPILER}: src/back/Compiler.cpp

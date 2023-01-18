@@ -4,6 +4,13 @@
 #include <sstream>
 #include <vector>
 #include <iterator>
+#include "../bnfc/Parser.H"
+#include "../bnfc/Absyn.H"
+#include "front/Find_def.h"
+#include "back/Compiler.h"
+#include "back/Optimizations.h"
+#include <filesystem>
+#include <fstream>
 
 using namespace std;
 
@@ -86,4 +93,44 @@ vector<string> split_str(const string &s, char delim) {
     std::vector<string> elems;
     split(s, delim, std::back_inserter(elems));
     return elems;
+}
+
+namespace fs = std::filesystem;
+string HEADER = "\t.intel_syntax noprefix\n" + string("\t.globl main\n");
+
+void backend(Program *parse_tree, char *filepath, char **argv){
+   // get function definitions
+	FindDef *fdef = new FindDef();
+	fdef->run(parse_tree);
+
+	// generate x86 code
+	Compiler *comp = new Compiler(fdef->funs);
+	comp->run(parse_tree);
+	string content = comp->full_code;
+	
+	// add string literals to Local Constants at the begining
+	string local_const_string = "";
+	local_const_string += ".LC_empty_str:\n\t.string \"\"\n";
+	for(auto pair: comp->local_const){
+		string safe_str = sanitize(pair.first);
+		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + safe_str + "\"\n";
+	}
+
+	string optimized = remove_redundant_lines(HEADER + local_const_string + content);
+
+	// generating assembly file
+    string asm_file = fs::path(filepath).replace_extension("s");
+	ofstream out(asm_file);
+    out << optimized;
+    out.close();
+
+    asm_file = "\"" + asm_file + "\"";
+    string target_file = "\"" + string(fs::path(filepath).replace_extension("")) + "\"";
+
+	string path_to_root =  string(fs::path(argv[0]).remove_filename());
+	string path_to_runtime = "\"" + path_to_root + "lib/runtime.o\"";
+
+	// generating binary executable
+	string to_binary = "i686-linux-gnu-gcc " + path_to_runtime + " " + asm_file + " -no-pie -m32 -masm=intel -o " + target_file;
+	system(to_binary.c_str());
 }
