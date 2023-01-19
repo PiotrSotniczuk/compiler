@@ -18,7 +18,7 @@ separator  Arg "," ;
 
 NoExt.     Ext ::= ;
 
-DoExt.     Ext ::= ":" Ident ;
+DoExt.     Ext ::= "extends" Ident ;
 
 ClsAtr.    ClsDecl ::= Type Ident ";";
 
