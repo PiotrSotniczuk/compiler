@@ -250,6 +250,7 @@ void Skeleton::visitClsType(ClsType *cls_type)
   /* Code For ClsType Goes Here */
 
   visitIdent(cls_type->ident_);
+  this->last_type = cls_type->ident_;
 
 }
 

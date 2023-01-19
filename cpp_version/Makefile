@@ -1,4 +1,4 @@
-CC=g++
+CC=g++-10
 CCFLAGS=-g -W -Wall -std=c++17
 
 BNFC_FILES=bnfc/Absyn.o bnfc/Lexer.o bnfc/Parser.o bnfc/Skeleton.o
