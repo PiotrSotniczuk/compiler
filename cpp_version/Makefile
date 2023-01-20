@@ -1,7 +1,7 @@
 CC=g++-10
 CCFLAGS=-g -W -Wall -std=c++17
 
-BNFC_FILES=bnfc/Absyn.o bnfc/Lexer.o bnfc/Parser.o bnfc/Skeleton.o
+BNFC_FILES=bnfc/Absyn.o bnfc/Lexer.o bnfc/Parser.o bnfc/Skeleton.o bnfc/Buffer.o
 TYPE_CHECKER=Type_checker.o
 FIND_DEF=Find_def.o
 SHARED=Shared.o

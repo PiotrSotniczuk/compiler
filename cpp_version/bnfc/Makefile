@@ -1,5 +1,5 @@
-CC=g++
-CCFLAGS=-g -W -Wall
+CC=g++ -g
+CCFLAGS=--ansi -W -Wall -Wno-unused-parameter -Wno-unused-function -Wno-unneeded-internal-declaration
 
 FLEX=flex
 FLEX_OPTS=-PLatteCPP
@@ -7,7 +7,7 @@ FLEX_OPTS=-PLatteCPP
 BISON=bison
 BISON_OPTS=-t -pLatteCPP
 
-OBJS=Absyn.o Lexer.o Parser.o Printer.o
+OBJS=Absyn.o Buffer.o Lexer.o Parser.o Printer.o
 
 .PHONY : clean distclean
 
@@ -17,14 +17,17 @@ clean :
 	rm -f *.o TestLatteCPP LatteCPP.aux LatteCPP.log LatteCPP.pdf LatteCPP.dvi LatteCPP.ps LatteCPP
 
 distclean : clean
-	rm -f Absyn.C Absyn.H Test.C Parser.C Parser.H Lexer.C Skeleton.C Skeleton.H Printer.C Printer.H Makefile LatteCPP.l LatteCPP.y LatteCPP.tex
+	rm -f Absyn.C Absyn.H Buffer.C Buffer.H Test.C Parser.C Parser.H ParserError.H LatteCPP.y Lexer.C LatteCPP.l Skeleton.C Skeleton.H Printer.C Printer.H Makefile LatteCPP.tex
 
 TestLatteCPP : ${OBJS} Test.o
 	@echo "Linking TestLatteCPP..."
-	${CC} ${CCFLAGS} ${OBJS} Test.o -o TestLatteCPP
+	${CC} ${OBJS} Test.o -o TestLatteCPP
 
 Absyn.o : Absyn.C Absyn.H
 	${CC} ${CCFLAGS} -c Absyn.C
+
+Buffer.o : Buffer.C Buffer.H
+	${CC} ${CCFLAGS} -c Buffer.C
 
 Lexer.C : LatteCPP.l
 	${FLEX} -oLexer.C LatteCPP.l

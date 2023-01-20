@@ -118,30 +118,25 @@ class PrintAbsyn : public Visitor
 
   void inline bufAppend(const char *s)
   {
-    int len = strlen(s);
-    while (cur_ + len >= buf_size)
-    {
-      buf_size *= 2; /* Double the buffer size */
+    int end = cur_ + strlen(s);
+    if (end >= buf_size) {
+      do buf_size *= 2; /* Double the buffer size */
+      while (end >= buf_size);
+      resizeBuffer();
     }
-    resizeBuffer();
-    for(int n = 0; n < len; n++)
-    {
-      buf_[cur_ + n] = s[n];
-    }
-    cur_ += len;
-    buf_[cur_] = 0;
+    strcpy(&buf_[cur_], s);
+    cur_ = end;
   }
 
   void inline bufAppend(const char c)
   {
-    if (cur_ >= buf_size)
+    if (cur_ + 1 >= buf_size)
     {
       buf_size *= 2; /* Double the buffer size */
       resizeBuffer();
     }
     buf_[cur_] = c;
-    cur_++;
-    buf_[cur_] = 0;
+    buf_[++cur_] = 0;
   }
 
   void inline bufAppend(String str)
@@ -277,30 +272,25 @@ class ShowAbsyn : public Visitor
 
   void inline bufAppend(const char *s)
   {
-    int len = strlen(s);
-    while (cur_ + len >= buf_size)
-    {
-      buf_size *= 2; /* Double the buffer size */
+    int end = cur_ + strlen(s);
+    if (end >= buf_size) {
+      do buf_size *= 2; /* Double the buffer size */
+      while (end >= buf_size);
+      resizeBuffer();
     }
-    resizeBuffer();
-    for(int n = 0; n < len; n++)
-    {
-      buf_[cur_ + n] = s[n];
-    }
-    cur_ += len;
-    buf_[cur_] = 0;
+    strcpy(&buf_[cur_], s);
+    cur_ = end;
   }
 
   void inline bufAppend(const char c)
   {
-    if (cur_ >= buf_size)
+    if (cur_ + 1 >= buf_size)
     {
       buf_size *= 2; /* Double the buffer size */
       resizeBuffer();
     }
     buf_[cur_] = c;
-    cur_++;
-    buf_[cur_] = 0;
+    buf_[++cur_] = 0;
   }
 
   void inline bufAppend(String str)

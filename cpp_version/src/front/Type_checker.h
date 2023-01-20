@@ -5,18 +5,22 @@
 #include "../../bnfc/Skeleton.H"
 #include <list>
 #include <map>
+#include "Find_def.h"
 
 using namespace std;
 
 class TypeChecker : public Skeleton {
     public:
-        TypeChecker(map<string, pair<string, vector<string>>> funs){
+        TypeChecker(map<string, pair<string, vector<string>>> funs, map<string, Klass> classes){
             this->funs = funs;
+            this->classes = classes;
             vars = list<map<string, string>>();
         }
+        // env, var,type
         list<map<string, string>> vars;
     private:
-        
+        // name, ret_type, args
+        map<string, Klass> classes;
         map<string, pair<string, vector<string>>> funs;
         string last_ident;
         string expr_type;
@@ -51,6 +55,15 @@ class TypeChecker : public Skeleton {
         virtual void visitEAnd(EAnd *p);
         virtual void visitEOr(EOr *p);
         virtual void visitDecl(Decl *decl);
+        virtual void visitClsDef(ClsDef *cls);
+        virtual void visitClsFun(ClsFun *cls_fun);
+        virtual void visitEClsAt(EClsAt *e_cls_at);
+        virtual void visitEClsApp(EClsApp *e_cls_app);
+        virtual void visitNewCls(NewCls *new_cls);
+        virtual void visitENull(ENull *e_null);
+        virtual void visitClsType(ClsType *cls_type);
+        virtual bool type_compatible(string l_type, string r_type);
+        //virtual void;
 };
 
 #endif

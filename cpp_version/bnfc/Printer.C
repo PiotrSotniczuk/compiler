@@ -23,6 +23,7 @@ void PrintAbsyn::render(Char c)
   {
      backup();
      bufAppend(c);
+     bufAppend(' ');
   }
   else if (c == '}')
   {
@@ -48,50 +49,53 @@ void PrintAbsyn::render(Char c)
      bufAppend('\n');
      indent();
   }
+  else if (c == ' ') bufAppend(c);
   else if (c == 0) return;
   else
   {
-     bufAppend(' ');
      bufAppend(c);
      bufAppend(' ');
   }
 }
 
-void PrintAbsyn::render(String s_)
+void PrintAbsyn::render(String s)
 {
-  const char *s = s_.c_str() ;
-  if(strlen(s) > 0)
-  {
-    bufAppend(s);
-    bufAppend(' ');
-  }
+  render(s.c_str());
 }
+
+bool allIsSpace(const char *s)
+{
+  char c;
+  while ((c = *s++))
+    if (! isspace(c)) return false;
+  return true;
+}
+
 void PrintAbsyn::render(const char *s)
 {
-  if(strlen(s) > 0)
+  if (*s) /* C string not empty */
   {
-    bufAppend(s);
-    bufAppend(' ');
+    if (allIsSpace(s)) {
+      backup();
+      bufAppend(s);
+    } else {
+      bufAppend(s);
+      bufAppend(' ');
+    }
   }
 }
 
 void PrintAbsyn::indent()
 {
   int n = _n_;
-  while (n > 0)
-  {
+  while (--n >= 0)
     bufAppend(' ');
-    n--;
-  }
 }
 
 void PrintAbsyn::backup()
 {
   if (buf_[cur_ - 1] == ' ')
-  {
-    buf_[cur_ - 1] = 0;
-    cur_--;
-  }
+    buf_[--cur_] = 0;
 }
 
 PrintAbsyn::PrintAbsyn(void)
@@ -210,7 +214,7 @@ void PrintAbsyn::visitDoExt(DoExt *p)
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
 
-  render(':');
+  render("extends");
   visitIdent(p->ident_);
 
   if (oldi > 0) render(_R_PAREN);
@@ -555,8 +559,6 @@ void PrintAbsyn::visitFun(Fun *p)
 {
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
-
-  /* Internal Category */
 
   _i_ = 0; p->type_->accept(this);
   render('(');
@@ -954,23 +956,23 @@ void PrintAbsyn::visitNE(NE *p)
 
 void PrintAbsyn::visitInteger(Integer i)
 {
-  char tmp[16];
+  char tmp[20];
   sprintf(tmp, "%d", i);
-  bufAppend(tmp);
+  render(tmp);
 }
 
 void PrintAbsyn::visitDouble(Double d)
 {
-  char tmp[16];
-  sprintf(tmp, "%g", d);
-  bufAppend(tmp);
+  char tmp[24];
+  sprintf(tmp, "%.15g", d);
+  render(tmp);
 }
 
 void PrintAbsyn::visitChar(Char c)
 {
-  bufAppend('\'');
-  bufAppend(c);
-  bufAppend('\'');
+  char tmp[4];
+  sprintf(tmp, "'%c'", c);
+  render(tmp);
 }
 
 void PrintAbsyn::visitString(String s)
@@ -978,6 +980,7 @@ void PrintAbsyn::visitString(String s)
   bufAppend('\"');
   bufAppend(s);
   bufAppend('\"');
+  bufAppend(' ');
 }
 
 void PrintAbsyn::visitIdent(String s)
@@ -1357,8 +1360,6 @@ void ShowAbsyn::visitFun(Fun *p)
   bufAppend('(');
   bufAppend("Fun");
   bufAppend(' ');
-/* Internal Category */
-  bufAppend(' ');
   bufAppend('[');
   if (p->type_)  p->type_->accept(this);
   bufAppend(']');
@@ -1616,14 +1617,14 @@ void ShowAbsyn::visitNE(NE *p)
 }
 void ShowAbsyn::visitInteger(Integer i)
 {
-  char tmp[16];
+  char tmp[20];
   sprintf(tmp, "%d", i);
   bufAppend(tmp);
 }
 void ShowAbsyn::visitDouble(Double d)
 {
-  char tmp[16];
-  sprintf(tmp, "%g", d);
+  char tmp[24];
+  sprintf(tmp, "%.15g", d);
   bufAppend(tmp);
 }
 void ShowAbsyn::visitChar(Char c)

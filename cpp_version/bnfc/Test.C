@@ -4,16 +4,18 @@
 /* pretty-print the result.                                                 */
 /*                                                                          */
 /****************************************************************************/
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <string>
+#include <iostream>
 #include "Parser.H"
 #include "Printer.H"
 #include "Absyn.H"
+#include "ParserError.H"
 
 void usage() {
   printf("usage: Call with one of the following argument combinations:\n");
   printf("\t--help\t\tDisplay this help message.\n");
-  printf("\t(no arguments)	Parse stdin verbosely.\n");
+  printf("\t(no arguments)\tParse stdin verbosely.\n");
   printf("\t(files)\t\tParse content of files verbosely.\n");
   printf("\t-s (files)\tSilent mode. Parse content of files silently.\n");
 }
@@ -45,7 +47,12 @@ int main(int argc, char ** argv)
     }
   } else input = stdin;
   /* The default entry point is used. For other options see Parser.H */
-  Program *parse_tree = pProgram(input);
+  Program *parse_tree = NULL;
+  try {
+  parse_tree = pProgram(input);
+  } catch( parse_error &e) {
+     std::cerr << "Parse error on line " << e.getLine() << "\n";
+  }
   if (parse_tree)
   {
     printf("\nParse Successful!\n");

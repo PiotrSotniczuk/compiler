@@ -44,23 +44,25 @@ int main(int argc, char **argv)
 		go_error(fdef->main_line, "'main' function shouldn't have arguments");
 	}
 
-	auto classes = fdef->classes;
-	for(auto & c : classes){
-		cout << c.first << c.second.size;
-		for(auto & a : c.second.attrs){
-			cout << a.first << a.second.first << a.second.second;
-		}
-	}
-
-	TypeChecker *myV = new TypeChecker(fdef->funs);
-    myV->run(parse_tree);
+	// auto classes = fdef->classes;
+	// for(auto & c : classes){
+	// 	cout << c.first << c.second.size << endl;;
+	// 	for(auto & a : c.second.attrs){
+	// 		cout << a.first << a.second.first << a.second.second << endl;
+	// 	}
+	// }
 
 	CheckReturn *ret = new CheckReturn();
 	ret->run(parse_tree);
 	
+	TypeChecker *myV = new TypeChecker(fdef->funs, fdef->classes);
+    myV->run(parse_tree);
+
+	
+	
 	cerr << "OK\n";
 
-	backend(parse_tree, filepath, argv);
+	//backend(parse_tree, filepath, argv);
 
 	return 0;
 }

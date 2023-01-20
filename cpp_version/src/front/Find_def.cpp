@@ -45,30 +45,30 @@ void FindDef::visitAr(Ar *ar)
 void FindDef::visitClsDef(ClsDef *cls_def)
 {
   visitIdent(cls_def->ident_);
-  string name = cls_def->ident_;
+  string cls_name = cls_def->ident_;
   Klass new_class = Klass();
   
   DoExt* ext = dynamic_cast<DoExt*>(cls_def->ext_);
   if(ext){
+    new_class.ext = ext->ident_;
     auto base_class = this->classes.find(ext->ident_);
     if(base_class == this->classes.end()){
       go_error(cls_def->line_number, "Base Class " + ext->ident_ + " was not declared");
     }
-    map<string, pair<string, int>> base_attrs(base_class->second.attrs);
+    map<pair<string, string>, pair<string, int>> base_attrs(base_class->second.attrs);
     new_class.attrs = base_attrs;
     new_class.size = base_class->second.size;
 
     map<string, tuple<string, string, vector<string>, int>> base_vtab(base_class->second.vtab);
     new_class.vtab = base_vtab;
   }
-
   auto iter = cls_def->listclsdecl_->begin();
   auto end = cls_def->listclsdecl_->end();
   for(; iter < end; iter++){
     ClsAtr* atr = dynamic_cast<ClsAtr*>(*iter);
     if(atr){
       atr->type_->accept(this);
-      auto to_insert = make_pair(name + "_" + atr->ident_, make_pair(this->last_type, new_class.size));
+      auto to_insert = make_pair(make_pair(atr->ident_, cls_name), make_pair(this->last_type, new_class.size));
       new_class.size++;
       if(!new_class.attrs.emplace(to_insert).second){
         go_error(atr->line_number, "Attribute " + atr->ident_ + " was already declared in this class");
@@ -80,29 +80,40 @@ void FindDef::visitClsDef(ClsDef *cls_def)
       fun->type_->accept(this);
       string ret_type = this->last_type;
 
-      vector<string> arg_vec = vector<string>();
-      auto iter = fun->listarg_->begin();
-      auto end = fun->listarg_->end();
-      for(; iter < end; iter++){
-        Ar* ar = dynamic_cast<Ar*>(*iter);
-        ar->type_->accept(this);
-        arg_vec.emplace_back(this->last_type);
-      }
-
-      int fun_offset = new_class.vtab.size();
-      auto to_insert = make_pair(fun->ident_, make_tuple(name, ret_type, arg_vec, fun_offset));
+      this->arg_types.clear();
+      fun->listarg_->accept(this);
       
-
-      // if(!new_class.vtab.emplace(to_insert).second){
-      //   go_error(fun->line_number, "Attribute " + atr->ident_ + " was already declared in this class");
-      // }
+      int fun_offset = new_class.vtab.size();
+      auto to_insert_sec = make_tuple(cls_name, ret_type, this->arg_types, fun_offset);
+      auto base_fun = new_class.vtab.find(fun->ident_);
+       if(base_fun == new_class.vtab.end()){
+         // insert normal function
+         new_class.vtab.emplace(make_pair(fun->ident_, to_insert_sec));
+       }else{
+         // there already is a funciton in this class
+         if(get<0>(base_fun->second) == cls_name){
+           go_error(fun->line_number, "This method " + fun->ident_ + " was already declared in this class");
+         }
+         base_fun->second = to_insert_sec;
+       }
     }
   }
-
-  this->classes.emplace(make_pair(name, new_class));    
+  this->classes.emplace(make_pair(cls_name, new_class));
 }
 
 void CheckReturn::visitFnDef(FnDef *fn_def)
+{
+  this->there_is_return = false;
+  fn_def->type_->accept(this);
+  if(this->last_type != "void"){
+    fn_def->block_->accept(this);
+    if(!this->there_is_return){
+      go_error(fn_def->line_number, "There is a missing return in function " + fn_def->ident_);
+    }
+  }
+}
+
+void CheckReturn::visitClsFun(ClsFun *fn_def)
 {
   this->there_is_return = false;
   fn_def->type_->accept(this);

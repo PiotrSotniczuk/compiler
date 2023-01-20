@@ -30,7 +30,7 @@ void Skeleton::visitProg(Prog *prog)
 {
   /* Code For Prog Goes Here */
 
-  prog->listtopdef_->accept(this);
+  if (prog->listtopdef_) prog->listtopdef_->accept(this);
 
 }
 
@@ -38,10 +38,10 @@ void Skeleton::visitFnDef(FnDef *fn_def)
 {
   /* Code For FnDef Goes Here */
 
-  fn_def->type_->accept(this);
+  if (fn_def->type_) fn_def->type_->accept(this);
   visitIdent(fn_def->ident_);
-  fn_def->listarg_->accept(this);
-  fn_def->block_->accept(this);
+  if (fn_def->listarg_) fn_def->listarg_->accept(this);
+  if (fn_def->block_) fn_def->block_->accept(this);
 
 }
 
@@ -50,8 +50,8 @@ void Skeleton::visitClsDef(ClsDef *cls_def)
   /* Code For ClsDef Goes Here */
 
   visitIdent(cls_def->ident_);
-  cls_def->ext_->accept(this);
-  cls_def->listclsdecl_->accept(this);
+  if (cls_def->ext_) cls_def->ext_->accept(this);
+  if (cls_def->listclsdecl_) cls_def->listclsdecl_->accept(this);
 
 }
 
@@ -59,7 +59,7 @@ void Skeleton::visitAr(Ar *ar)
 {
   /* Code For Ar Goes Here */
 
-  ar->type_->accept(this);
+  if (ar->type_) ar->type_->accept(this);
   visitIdent(ar->ident_);
 
 }
@@ -83,7 +83,7 @@ void Skeleton::visitClsAtr(ClsAtr *cls_atr)
 {
   /* Code For ClsAtr Goes Here */
 
-  cls_atr->type_->accept(this);
+  if (cls_atr->type_) cls_atr->type_->accept(this);
   visitIdent(cls_atr->ident_);
 
 }
@@ -92,10 +92,10 @@ void Skeleton::visitClsFun(ClsFun *cls_fun)
 {
   /* Code For ClsFun Goes Here */
 
-  cls_fun->type_->accept(this);
+  if (cls_fun->type_) cls_fun->type_->accept(this);
   visitIdent(cls_fun->ident_);
-  cls_fun->listarg_->accept(this);
-  cls_fun->block_->accept(this);
+  if (cls_fun->listarg_) cls_fun->listarg_->accept(this);
+  if (cls_fun->block_) cls_fun->block_->accept(this);
 
 }
 
@@ -103,7 +103,7 @@ void Skeleton::visitBlk(Blk *blk)
 {
   /* Code For Blk Goes Here */
 
-  blk->liststmt_->accept(this);
+  if (blk->liststmt_) blk->liststmt_->accept(this);
 
 }
 
@@ -118,7 +118,7 @@ void Skeleton::visitBStmt(BStmt *b_stmt)
 {
   /* Code For BStmt Goes Here */
 
-  b_stmt->block_->accept(this);
+  if (b_stmt->block_) b_stmt->block_->accept(this);
 
 }
 
@@ -126,8 +126,8 @@ void Skeleton::visitDecl(Decl *decl)
 {
   /* Code For Decl Goes Here */
 
-  decl->type_->accept(this);
-  decl->listitem_->accept(this);
+  if (decl->type_) decl->type_->accept(this);
+  if (decl->listitem_) decl->listitem_->accept(this);
 
 }
 
@@ -136,7 +136,7 @@ void Skeleton::visitAss(Ass *ass)
   /* Code For Ass Goes Here */
 
   visitIdent(ass->ident_);
-  ass->expr_->accept(this);
+  if (ass->expr_) ass->expr_->accept(this);
 
 }
 
@@ -160,7 +160,7 @@ void Skeleton::visitRet(Ret *ret)
 {
   /* Code For Ret Goes Here */
 
-  ret->expr_->accept(this);
+  if (ret->expr_) ret->expr_->accept(this);
 
 }
 
@@ -175,8 +175,8 @@ void Skeleton::visitCond(Cond *cond)
 {
   /* Code For Cond Goes Here */
 
-  cond->expr_->accept(this);
-  cond->stmt_->accept(this);
+  if (cond->expr_) cond->expr_->accept(this);
+  if (cond->stmt_) cond->stmt_->accept(this);
 
 }
 
@@ -184,9 +184,9 @@ void Skeleton::visitCondElse(CondElse *cond_else)
 {
   /* Code For CondElse Goes Here */
 
-  cond_else->expr_->accept(this);
-  cond_else->stmt_1->accept(this);
-  cond_else->stmt_2->accept(this);
+  if (cond_else->expr_) cond_else->expr_->accept(this);
+  if (cond_else->stmt_1) cond_else->stmt_1->accept(this);
+  if (cond_else->stmt_2) cond_else->stmt_2->accept(this);
 
 }
 
@@ -194,8 +194,8 @@ void Skeleton::visitWhile(While *while_)
 {
   /* Code For While Goes Here */
 
-  while_->expr_->accept(this);
-  while_->stmt_->accept(this);
+  if (while_->expr_) while_->expr_->accept(this);
+  if (while_->stmt_) while_->stmt_->accept(this);
 
 }
 
@@ -203,7 +203,7 @@ void Skeleton::visitSExp(SExp *s_exp)
 {
   /* Code For SExp Goes Here */
 
-  s_exp->expr_->accept(this);
+  if (s_exp->expr_) s_exp->expr_->accept(this);
 
 }
 
@@ -220,7 +220,7 @@ void Skeleton::visitInit(Init *init)
   /* Code For Init Goes Here */
 
   visitIdent(init->ident_);
-  init->expr_->accept(this);
+  if (init->expr_) init->expr_->accept(this);
 
 }
 
@@ -288,7 +288,7 @@ void Skeleton::visitEClsAt(EClsAt *e_cls_at)
 {
   /* Code For EClsAt Goes Here */
 
-  e_cls_at->expr_->accept(this);
+  if (e_cls_at->expr_) e_cls_at->expr_->accept(this);
   visitIdent(e_cls_at->ident_);
 
 }
@@ -297,9 +297,9 @@ void Skeleton::visitEClsApp(EClsApp *e_cls_app)
 {
   /* Code For EClsApp Goes Here */
 
-  e_cls_app->expr_->accept(this);
+  if (e_cls_app->expr_) e_cls_app->expr_->accept(this);
   visitIdent(e_cls_app->ident_);
-  e_cls_app->listexpr_->accept(this);
+  if (e_cls_app->listexpr_) e_cls_app->listexpr_->accept(this);
 
 }
 
@@ -315,7 +315,7 @@ void Skeleton::visitENull(ENull *e_null)
 {
   /* Code For ENull Goes Here */
 
-  e_null->type_->accept(this);
+  if (e_null->type_) e_null->type_->accept(this);
 
 }
 
@@ -346,7 +346,7 @@ void Skeleton::visitEApp(EApp *e_app)
   /* Code For EApp Goes Here */
 
   visitIdent(e_app->ident_);
-  e_app->listexpr_->accept(this);
+  if (e_app->listexpr_) e_app->listexpr_->accept(this);
 
 }
 
@@ -362,7 +362,7 @@ void Skeleton::visitNeg(Neg *neg)
 {
   /* Code For Neg Goes Here */
 
-  neg->expr_->accept(this);
+  if (neg->expr_) neg->expr_->accept(this);
 
 }
 
@@ -370,7 +370,7 @@ void Skeleton::visitNot(Not *not_)
 {
   /* Code For Not Goes Here */
 
-  not_->expr_->accept(this);
+  if (not_->expr_) not_->expr_->accept(this);
 
 }
 
@@ -378,9 +378,9 @@ void Skeleton::visitEMul(EMul *e_mul)
 {
   /* Code For EMul Goes Here */
 
-  e_mul->expr_1->accept(this);
-  e_mul->mulop_->accept(this);
-  e_mul->expr_2->accept(this);
+  if (e_mul->expr_1) e_mul->expr_1->accept(this);
+  if (e_mul->mulop_) e_mul->mulop_->accept(this);
+  if (e_mul->expr_2) e_mul->expr_2->accept(this);
 
 }
 
@@ -388,9 +388,9 @@ void Skeleton::visitEAdd(EAdd *e_add)
 {
   /* Code For EAdd Goes Here */
 
-  e_add->expr_1->accept(this);
-  e_add->addop_->accept(this);
-  e_add->expr_2->accept(this);
+  if (e_add->expr_1) e_add->expr_1->accept(this);
+  if (e_add->addop_) e_add->addop_->accept(this);
+  if (e_add->expr_2) e_add->expr_2->accept(this);
 
 }
 
@@ -398,9 +398,9 @@ void Skeleton::visitERel(ERel *e_rel)
 {
   /* Code For ERel Goes Here */
 
-  e_rel->expr_1->accept(this);
-  e_rel->relop_->accept(this);
-  e_rel->expr_2->accept(this);
+  if (e_rel->expr_1) e_rel->expr_1->accept(this);
+  if (e_rel->relop_) e_rel->relop_->accept(this);
+  if (e_rel->expr_2) e_rel->expr_2->accept(this);
 
 }
 
@@ -408,8 +408,8 @@ void Skeleton::visitEAnd(EAnd *e_and)
 {
   /* Code For EAnd Goes Here */
 
-  e_and->expr_1->accept(this);
-  e_and->expr_2->accept(this);
+  if (e_and->expr_1) e_and->expr_1->accept(this);
+  if (e_and->expr_2) e_and->expr_2->accept(this);
 
 }
 
@@ -417,8 +417,8 @@ void Skeleton::visitEOr(EOr *e_or)
 {
   /* Code For EOr Goes Here */
 
-  e_or->expr_1->accept(this);
-  e_or->expr_2->accept(this);
+  if (e_or->expr_1) e_or->expr_1->accept(this);
+  if (e_or->expr_2) e_or->expr_2->accept(this);
 
 }
 

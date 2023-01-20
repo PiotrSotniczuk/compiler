@@ -12,13 +12,15 @@ using namespace std;
 class Klass {
     public:
         int size;
-        // name <type, offset>
-        map<string, pair<string, int>> attrs;
+        string ext;
+        // <name, klas> <type, offset>
+        map<pair<string, string>, pair<string, int>> attrs;
 // function table: name, class, ret_type, args[type]
         map<string, tuple<string, string, vector<string>, int>> vtab;
         Klass(void){
             size = 1;
-            attrs = map<string, pair<string, int>>();
+            ext = "";
+            attrs = map<pair<string, string>, pair<string, int>>();
             vtab = map<string, tuple<string, string, vector<string>, int>>();
         }
 };
@@ -63,6 +65,7 @@ class CheckReturn : public Skeleton {
         virtual void visitCondElse(CondElse *cond_else);
         virtual void visitWhile(While *while_); 
         virtual void visitEApp(EApp *e_app);
+        virtual void visitClsFun(ClsFun *fn_def);
 };
 
 #endif

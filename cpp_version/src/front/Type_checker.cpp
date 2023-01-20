@@ -2,6 +2,7 @@
 #include <iostream>
 #include "Type_checker.h"
 #include "../Shared.h"
+#include <cassert>
 
 using namespace std;
 
@@ -50,7 +51,7 @@ void TypeChecker::visitInit(Init *init)
   visitIdent(init->ident_);
   this->last_ident = init->ident_;
   init->expr_->accept(this);
-  if(this->expr_type != dec_type){
+  if(!type_compatible(dec_type, this->expr_type)){
     go_error(init->line_number, "Type of var does not match type of expresion");
   }
 }
@@ -71,8 +72,8 @@ void TypeChecker::visitAss(Ass *ass)
   visitIdent(ass->ident_);
   string varType = this->getVarType(ass->ident_, ass->line_number);
   ass->expr_->accept(this);
-  if(varType != this->expr_type){
-    go_error(ass->line_number, "Type of expression does not match type of var.");
+  if(!type_compatible(varType, this->expr_type)){
+    go_error(ass->line_number, "Type of expression " + this->expr_type +" does not match type of var " + varType);
   }
 }
 
@@ -111,10 +112,40 @@ void TypeChecker::visitFnDef(FnDef *fn_def)
   this->vars.pop_front();
 }
 
+void TypeChecker::visitClsDef(ClsDef *cls)
+{
+  this->vars.push_front(map<string, string>());
+
+  auto cls_obj = this->classes.find(cls->ident_);
+  assert(cls_obj != this->classes.end());
+  for(auto atr : cls_obj->second.attrs){
+    // TODO moze tu dodaj tylko pierwszy jesli sie dziedzicza
+    this->vars.begin()->emplace(make_pair(atr.first.first, atr.second.first));
+  }
+  cls->listclsdecl_->accept(this);
+  this->vars.pop_front();
+}
+
+void TypeChecker::visitClsFun(ClsFun *cls_fun){
+  cls_fun->type_->accept(this);
+  this->act_fun_type = this->last_type;
+
+  Blk* blk = dynamic_cast<Blk*>(cls_fun->block_);
+  this->vars.push_front(map<string, string>());
+
+  for (Arg* arg: *(cls_fun->listarg_)){
+    Ar* ar = dynamic_cast<Ar*>(arg);
+    ar->type_->accept(this);
+    this->vars.begin()->emplace(make_pair(ar->ident_, this->last_type));
+  }
+  visitBlkFun(blk);
+  this->vars.pop_front();
+}
+
 void TypeChecker::visitRet(Ret *ret)
 {
   ret->expr_->accept(this);
-  if(this->expr_type != this->act_fun_type){
+  if(!type_compatible(this->act_fun_type, this->expr_type)){
     go_error(ret->line_number, "Return type does not match function type.");
   }
 }
@@ -202,8 +233,10 @@ void TypeChecker::visitListExpr(ListExpr *list_expr, vector<string> args, int li
   if(args.size() != argsExpr.size()){
     go_error(line, "Number of arguments does not match number of arguments in declaration.");
   }
-  if(args != argsExpr){
-    go_error(line, "Some arguments types are not matching with function declaration.");
+  for (long unsigned int i=0; i<args.size(); i++){
+    if(!type_compatible(args[i], argsExpr[i])){
+      go_error(line, "Some arguments types are not matching with function declaration.");
+    }
   }
 }
 
@@ -323,4 +356,85 @@ void TypeChecker::visitEOr(EOr *e_or)
   if(this->expr_type != "boolean"){
     go_error(e_or->line_number, "Expression is not 'boolean'.");
   }
+}
+
+void TypeChecker::visitEClsAt(EClsAt *e_cls_at)
+{
+  /* Code For EClsAt Goes Here */
+
+  e_cls_at->expr_->accept(this);
+  string cls_type = this->expr_type;
+  auto attrs = this->classes.find(cls_type)->second.attrs;
+  auto atr_it = attrs.find(make_pair(e_cls_at->ident_, cls_type));
+  this->expr_type = atr_it->second.first;
+}
+
+void TypeChecker::visitEClsApp(EClsApp *e_cls_app)
+{
+  /* Code For EClsApp Goes Here */
+
+  e_cls_app->expr_->accept(this);
+  string cls_type = this->expr_type;
+  auto cls_it = this->classes.find(cls_type);
+  assert(cls_it != this->classes.end());
+
+  auto fun_it = cls_it->second.vtab.find(e_cls_app->ident_);
+  if(fun_it == cls_it->second.vtab.end()){
+     go_error(e_cls_app->line_number, "Class " + cls_type + " doesn't have method " + e_cls_app->ident_);
+  } 
+
+  this->visitListExpr(e_cls_app->listexpr_, get<2>(fun_it->second), e_cls_app->line_number);
+  this->expr_type = get<1>(fun_it->second);
+}
+
+void TypeChecker::visitNewCls(NewCls *new_cls)
+{
+  /* Code For NewCls Goes Here */
+
+  visitIdent(new_cls->ident_);
+  if(this->classes.find(new_cls->ident_) == this->classes.end()){
+    go_error(new_cls->line_number, "This class is not declared.");
+  }
+  this->expr_type = new_cls->ident_;
+}
+
+void TypeChecker::visitENull(ENull *e_null)
+{
+  /* Code For ENull Goes Here */
+  e_null->type_->accept(this);
+  if(this->classes.find(this->last_type) == this->classes.end()){
+    go_error(e_null->line_number, "You can only cast Object types.");
+  }
+}
+
+void TypeChecker::visitClsType(ClsType *cls_type)
+{
+  /* Code For ClsType Goes Here */
+  visitIdent(cls_type->ident_);
+  if(this->classes.find(cls_type->ident_) == this->classes.end()){
+    go_error(cls_type->line_number, "This class is not declared.");
+  }
+  this->last_type = cls_type->ident_;
+}
+
+bool TypeChecker::type_compatible(string l_type, string r_type){
+  if(l_type == r_type){
+    return true;
+  }
+  auto l_it = this->classes.find(l_type);
+  auto r_it = this->classes.find(r_type);
+  if(l_it == this->classes.end() || r_it == this->classes.end()){
+    return false;
+  }
+
+  string ext = r_it->second.ext;
+  while(ext != ""){
+    if(ext == l_type){
+      return true;
+    }
+    auto next_ext_it = this->classes.find(ext);
+    assert(next_ext_it != this->classes.end());
+    ext = next_ext_it->second.ext;
+  }
+  return false;  
 }
