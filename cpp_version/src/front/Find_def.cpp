@@ -68,10 +68,23 @@ void FindDef::visitClsDef(ClsDef *cls_def)
     ClsAtr* atr = dynamic_cast<ClsAtr*>(*iter);
     if(atr){
       atr->type_->accept(this);
-      auto to_insert = make_pair(make_pair(atr->ident_, cls_name), make_pair(this->last_type, new_class.size));
-      new_class.size++;
-      if(!new_class.attrs.emplace(to_insert).second){
-        go_error(atr->line_number, "Attribute " + atr->ident_ + " was already declared in this class");
+      string dec_t = this->last_type;
+      for (ListItem::iterator i = atr->listitem_->begin() ; i != atr->listitem_->end() ; ++i){
+        string atr_ident = "";
+        NoInit* ni = dynamic_cast<NoInit*>(*i);
+        if(ni){
+          atr_ident = ni->ident_;
+        }
+        Init* init = dynamic_cast<Init*>(*i);
+        if(init){
+          atr_ident = init->ident_;
+        }
+
+        auto to_insert = make_pair(make_pair(atr_ident, cls_name), make_pair(dec_t, new_class.size));
+        new_class.size++;
+        if(!new_class.attrs.emplace(to_insert).second){
+          go_error(atr->line_number, "Attribute " + atr_ident + " was already declared in this class");
+        }
       }
     }
 

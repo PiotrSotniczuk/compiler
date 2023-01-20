@@ -285,17 +285,17 @@ DoExt *DoExt::clone() const
 
 
 /********************   ClsAtr    ********************/
-ClsAtr::ClsAtr(Type *p1, Ident p2)
+ClsAtr::ClsAtr(Type *p1, ListItem *p2)
 {
   type_ = p1;
-  ident_ = p2;
+  listitem_ = p2;
 
 }
 
 ClsAtr::ClsAtr(const ClsAtr & other)
 {
   type_ = other.type_->clone();
-  ident_ = other.ident_;
+  listitem_ = other.listitem_->clone();
 
 }
 
@@ -309,13 +309,14 @@ ClsAtr &ClsAtr::operator=(const ClsAtr & other)
 void ClsAtr::swap(ClsAtr & other)
 {
   std::swap(type_, other.type_);
-  std::swap(ident_, other.ident_);
+  std::swap(listitem_, other.listitem_);
 
 }
 
 ClsAtr::~ClsAtr()
 {
   delete(type_);
+  delete(listitem_);
 
 }
 
@@ -605,6 +606,57 @@ void Ass::accept(Visitor *v)
 Ass *Ass::clone() const
 {
   return new Ass(*this);
+}
+
+
+
+/********************   AtrAss    ********************/
+AtrAss::AtrAss(Expr *p1, Ident p2, Expr *p3)
+{
+  expr_1 = p1;
+  ident_ = p2;
+  expr_2 = p3;
+
+}
+
+AtrAss::AtrAss(const AtrAss & other)
+{
+  expr_1 = other.expr_1->clone();
+  ident_ = other.ident_;
+  expr_2 = other.expr_2->clone();
+
+}
+
+AtrAss &AtrAss::operator=(const AtrAss & other)
+{
+  AtrAss tmp(other);
+  swap(tmp);
+  return *this;
+}
+
+void AtrAss::swap(AtrAss & other)
+{
+  std::swap(expr_1, other.expr_1);
+  std::swap(ident_, other.ident_);
+  std::swap(expr_2, other.expr_2);
+
+}
+
+AtrAss::~AtrAss()
+{
+  delete(expr_1);
+  delete(expr_2);
+
+}
+
+void AtrAss::accept(Visitor *v)
+{
+  v->visitAtrAss(this);
+}
+
+AtrAss *AtrAss::clone() const
+{
+  return new AtrAss(*this);
 }
 
 

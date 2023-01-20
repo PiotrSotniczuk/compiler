@@ -21,19 +21,19 @@ latc_x86: ${RUNTIME} src/back/Back.cpp ${BACK_LIBS}
 	@echo "Compiling LatteBackend..."
 	${CC} ${CCFLAGS} ${BACK_LIBS} src/back/Back.cpp -o latc_x86
 
-${TYPE_CHECKER}: src/front/Type_checker.cpp
+${TYPE_CHECKER}: src/front/Type_checker.cpp src/front/Type_checker.h
 	${CC} ${CCFLAGS} -c src/front/Type_checker.cpp -o ${TYPE_CHECKER}
 
-${FIND_DEF}: src/front/Find_def.cpp
+${FIND_DEF}: src/front/Find_def.cpp src/front/Find_def.h
 	${CC} ${CCFLAGS} -c src/front/Find_def.cpp -o ${FIND_DEF}
 
-${SHARED}: src/Shared.cpp 
+${SHARED}: src/Shared.cpp src/Shared.h
 	${CC} ${CCFLAGS} -c src/Shared.cpp -o ${SHARED}
 
-${COMPILER}: src/back/Compiler.cpp
+${COMPILER}: src/back/Compiler.cpp src/back/Compiler.h
 	${CC} ${CCFLAGS} -c src/back/Compiler.cpp -o ${COMPILER}
 
-${OPTIMS}: src/back/Optimizations.cpp
+${OPTIMS}: src/back/Optimizations.cpp src/back/Optimizations.h
 	${CC} ${CCFLAGS} -c src/back/Optimizations.cpp -o ${OPTIMS}
 
 ${RUNTIME}: lib/runtime.c

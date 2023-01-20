@@ -84,7 +84,7 @@ void Skeleton::visitClsAtr(ClsAtr *cls_atr)
   /* Code For ClsAtr Goes Here */
 
   if (cls_atr->type_) cls_atr->type_->accept(this);
-  visitIdent(cls_atr->ident_);
+  if (cls_atr->listitem_) cls_atr->listitem_->accept(this);
 
 }
 
@@ -137,6 +137,16 @@ void Skeleton::visitAss(Ass *ass)
 
   visitIdent(ass->ident_);
   if (ass->expr_) ass->expr_->accept(this);
+
+}
+
+void Skeleton::visitAtrAss(AtrAss *atr_ass)
+{
+  /* Code For AtrAss Goes Here */
+
+  if (atr_ass->expr_1) atr_ass->expr_1->accept(this);
+  visitIdent(atr_ass->ident_);
+  if (atr_ass->expr_2) atr_ass->expr_2->accept(this);
 
 }
 

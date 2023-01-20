@@ -230,7 +230,7 @@ void PrintAbsyn::visitClsAtr(ClsAtr *p)
   if (oldi > 0) render(_L_PAREN);
 
   _i_ = 0; p->type_->accept(this);
-  visitIdent(p->ident_);
+  if(p->listitem_) {_i_ = 0; p->listitem_->accept(this);}
   render(';');
 
   if (oldi > 0) render(_R_PAREN);
@@ -334,6 +334,22 @@ void PrintAbsyn::visitAss(Ass *p)
   render('=');
   _i_ = 0; p->expr_->accept(this);
   render(';');
+
+  if (oldi > 0) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
+void PrintAbsyn::visitAtrAss(AtrAss *p)
+{
+  int oldi = _i_;
+  if (oldi > 0) render(_L_PAREN);
+
+  _i_ = 0; p->expr_1->accept(this);
+  render('.');
+  visitIdent(p->ident_);
+  render('=');
+  _i_ = 0; p->expr_2->accept(this);
 
   if (oldi > 0) render(_R_PAREN);
 
@@ -1113,7 +1129,9 @@ void ShowAbsyn::visitClsAtr(ClsAtr *p)
   if (p->type_)  p->type_->accept(this);
   bufAppend(']');
   bufAppend(' ');
-  visitIdent(p->ident_);
+  bufAppend('[');
+  if (p->listitem_)  p->listitem_->accept(this);
+  bufAppend(']');
   bufAppend(' ');
   bufAppend(')');
 }
@@ -1210,6 +1228,18 @@ void ShowAbsyn::visitAss(Ass *p)
   if (p->expr_)  p->expr_->accept(this);
   bufAppend(']');
   bufAppend(' ');
+  bufAppend(')');
+}
+void ShowAbsyn::visitAtrAss(AtrAss *p)
+{
+  bufAppend('(');
+  bufAppend("AtrAss");
+  bufAppend(' ');
+  p->expr_1->accept(this);
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  p->expr_2->accept(this);
   bufAppend(')');
 }
 void ShowAbsyn::visitIncr(Incr *p)

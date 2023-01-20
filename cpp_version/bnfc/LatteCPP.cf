@@ -20,7 +20,7 @@ NoExt.     Ext ::= ;
 
 DoExt.     Ext ::= "extends" Ident ;
 
-ClsAtr.    ClsDecl ::= Type Ident ";";
+ClsAtr.    ClsDecl ::= Type [Item] ";";
 
 ClsFun.    ClsDecl ::= Type Ident "(" [Arg] ")" Block ;
 
@@ -45,6 +45,8 @@ Init.      Item ::= Ident "=" Expr ;
 separator nonempty Item "," ;
 
 Ass.       Stmt ::= Ident "=" Expr  ";" ;
+
+AtrAss.    Stmt ::= Expr "." Ident "=" Expr;
 
 Incr.      Stmt ::= Ident "++"  ";" ;
 

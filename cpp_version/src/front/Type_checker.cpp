@@ -23,6 +23,7 @@ void TypeChecker::visitListItem(ListItem *list_item)
   string dec_type = this->last_type;
   for (ListItem::iterator i = list_item->begin() ; i != list_item->end() ; ++i)
   {
+    this->last_type = dec_type;
     (*i)->accept(this);
     if(!this->vars.begin()->emplace(make_pair(this->last_ident, dec_type)).second){
       go_error((*i)->line_number, "This var was already declared in this scope.");
@@ -37,6 +38,20 @@ void TypeChecker::visitDecl(Decl *decl)
     go_error(decl->line_number, "You should not declare variables of type void");
   }
   decl->listitem_->accept(this);
+}
+
+void TypeChecker::visitClsAtr(ClsAtr *cls_atr)
+{
+  cls_atr->type_->accept(this);
+  string dec_type = this->last_type;
+  if (this->last_type == "void"){
+    go_error(cls_atr->line_number, "You should not declare variables of type void");
+  }
+  for (ListItem::iterator i = cls_atr->listitem_->begin() ; i != cls_atr->listitem_->end() ; ++i)
+  {
+    this->last_type = dec_type;
+    (*i)->accept(this);
+  }
 }
 
 void TypeChecker::visitNoInit(NoInit *no_init)
@@ -115,6 +130,7 @@ void TypeChecker::visitFnDef(FnDef *fn_def)
 void TypeChecker::visitClsDef(ClsDef *cls)
 {
   this->vars.push_front(map<string, string>());
+  this->vars.begin()->emplace(make_pair("self", cls->ident_));
 
   auto cls_obj = this->classes.find(cls->ident_);
   assert(cls_obj != this->classes.end());
@@ -437,4 +453,22 @@ bool TypeChecker::type_compatible(string l_type, string r_type){
     ext = next_ext_it->second.ext;
   }
   return false;  
+}
+
+void TypeChecker::visitAtrAss(AtrAss *atr_ass)
+{
+  /* Code For AtrAss Goes Here */
+  atr_ass->expr_1->accept(this);
+  string cls_t = this->expr_type;
+  auto cls_it = this->classes.find(cls_t);
+  assert(cls_it != this->classes.end());
+  auto atr_it = cls_it->second.attrs.find(make_pair(atr_ass->ident_, cls_t));
+  if(atr_it == cls_it->second.attrs.end()){
+    go_error(atr_ass->line_number, "This attribute doesn't exist in class " + cls_t);
+  }
+
+  atr_ass->expr_2->accept(this);
+  if(!type_compatible(atr_it->second.first, this->expr_type)){
+    go_error(atr_ass->line_number, "Type of atr does not match type of expresion");
+  }
 }

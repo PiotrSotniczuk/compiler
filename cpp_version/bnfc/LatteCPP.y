@@ -102,11 +102,11 @@ Program* pProgram(const char *str)
 %token _SYMB_1    //   )
 %token _SYMB_15    //   *
 %token _SYMB_14    //   +
-%token _SYMB_7    //   ++
+%token _SYMB_8    //   ++
 %token _SYMB_4    //   ,
 %token _SYMB_10    //   -
-%token _SYMB_8    //   --
-%token _SYMB_9    //   .
+%token _SYMB_9    //   --
+%token _SYMB_7    //   .
 %token _SYMB_16    //   /
 %token _SYMB_5    //   ;
 %token _SYMB_18    //   <
@@ -185,7 +185,7 @@ ListArg : /* empty */ {  $$ = new ListArg();  }
 Ext : /* empty */ {  $$ = new NoExt(); $$->line_number = yy_mylinenumber;  }
   | _SYMB_27 _IDENT_ {  $$ = new DoExt($2); $$->line_number = yy_mylinenumber;  }
 ;
-ClsDecl : Type _IDENT_ _SYMB_5 {  $$ = new ClsAtr($1, $2); $$->line_number = yy_mylinenumber;  }
+ClsDecl : Type ListItem _SYMB_5 {  std::reverse($2->begin(),$2->end()) ;$$ = new ClsAtr($1, $2); $$->line_number = yy_mylinenumber;  }
   | Type _IDENT_ _SYMB_0 ListArg _SYMB_1 Block {  std::reverse($4->begin(),$4->end()) ;$$ = new ClsFun($1, $2, $4, $6); $$->line_number = yy_mylinenumber;  }
 ;
 ListClsDecl : /* empty */ {  $$ = new ListClsDecl();  }
@@ -200,8 +200,9 @@ Stmt : _SYMB_5 {  $$ = new Empty(); $$->line_number = yy_mylinenumber;  }
   | Block {  $$ = new BStmt($1); $$->line_number = yy_mylinenumber;  }
   | Type ListItem _SYMB_5 {  std::reverse($2->begin(),$2->end()) ;$$ = new Decl($1, $2); $$->line_number = yy_mylinenumber;  }
   | _IDENT_ _SYMB_6 Expr _SYMB_5 {  $$ = new Ass($1, $3); $$->line_number = yy_mylinenumber;  }
-  | _IDENT_ _SYMB_7 _SYMB_5 {  $$ = new Incr($1); $$->line_number = yy_mylinenumber;  }
-  | _IDENT_ _SYMB_8 _SYMB_5 {  $$ = new Decr($1); $$->line_number = yy_mylinenumber;  }
+  | Expr _SYMB_7 _IDENT_ _SYMB_6 Expr {  $$ = new AtrAss($1, $3, $5); $$->line_number = yy_mylinenumber;  }
+  | _IDENT_ _SYMB_8 _SYMB_5 {  $$ = new Incr($1); $$->line_number = yy_mylinenumber;  }
+  | _IDENT_ _SYMB_9 _SYMB_5 {  $$ = new Decr($1); $$->line_number = yy_mylinenumber;  }
   | _SYMB_33 Expr _SYMB_5 {  $$ = new Ret($2); $$->line_number = yy_mylinenumber;  }
   | _SYMB_33 _SYMB_5 {  $$ = new VRet(); $$->line_number = yy_mylinenumber;  }
   | _SYMB_29 _SYMB_0 Expr _SYMB_1 Stmt {  $$ = new Cond($3, $5); $$->line_number = yy_mylinenumber;  }
@@ -228,8 +229,8 @@ ListType : /* empty */ {  $$ = new ListType();  }
 Expr8 : _IDENT_ {  $$ = new EVar($1); $$->line_number = yy_mylinenumber;  }
   | _SYMB_0 Expr _SYMB_1 {  $$ = $2;  }
 ;
-Expr7 : Expr7 _SYMB_9 _IDENT_ {  $$ = new EClsAt($1, $3); $$->line_number = yy_mylinenumber;  }
-  | Expr7 _SYMB_9 _IDENT_ _SYMB_0 ListExpr _SYMB_1 {  std::reverse($5->begin(),$5->end()) ;$$ = new EClsApp($1, $3, $5); $$->line_number = yy_mylinenumber;  }
+Expr7 : Expr7 _SYMB_7 _IDENT_ {  $$ = new EClsAt($1, $3); $$->line_number = yy_mylinenumber;  }
+  | Expr7 _SYMB_7 _IDENT_ _SYMB_0 ListExpr _SYMB_1 {  std::reverse($5->begin(),$5->end()) ;$$ = new EClsApp($1, $3, $5); $$->line_number = yy_mylinenumber;  }
   | _SYMB_31 _IDENT_ {  $$ = new NewCls($2); $$->line_number = yy_mylinenumber;  }
   | Expr8 {  $$ = $1;  }
 ;

@@ -63,7 +63,8 @@ class TypeChecker : public Skeleton {
         virtual void visitENull(ENull *e_null);
         virtual void visitClsType(ClsType *cls_type);
         virtual bool type_compatible(string l_type, string r_type);
-        //virtual void;
+        virtual void visitAtrAss(AtrAss *atr_ass);
+        virtual void visitClsAtr(ClsAtr *cls_atr);
 };
 
 #endif

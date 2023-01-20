@@ -47,6 +47,7 @@ class Decl;
 class NoInit;
 class Init;
 class Ass;
+class AtrAss;
 class Incr;
 class Decr;
 class Ret;
@@ -131,6 +132,7 @@ public:
   virtual void visitNoInit(NoInit *p) = 0;
   virtual void visitInit(Init *p) = 0;
   virtual void visitAss(Ass *p) = 0;
+  virtual void visitAtrAss(AtrAss *p) = 0;
   virtual void visitIncr(Incr *p) = 0;
   virtual void visitDecr(Decr *p) = 0;
   virtual void visitRet(Ret *p) = 0;
@@ -387,11 +389,11 @@ class ClsAtr : public ClsDecl
 {
 public:
   Type *type_;
-  Ident ident_;
+  ListItem *listitem_;
 
   ClsAtr(const ClsAtr &);
   ClsAtr &operator=(const ClsAtr &);
-  ClsAtr(Type *p1, Ident p2);
+  ClsAtr(Type *p1, ListItem *p2);
   ~ClsAtr();
   virtual void accept(Visitor *v);
   virtual ClsAtr *clone() const;
@@ -484,6 +486,22 @@ public:
   virtual void accept(Visitor *v);
   virtual Ass *clone() const;
   void swap(Ass &);
+};
+
+class AtrAss : public Stmt
+{
+public:
+  Expr *expr_1;
+  Ident ident_;
+  Expr *expr_2;
+
+  AtrAss(const AtrAss &);
+  AtrAss &operator=(const AtrAss &);
+  AtrAss(Expr *p1, Ident p2, Expr *p3);
+  ~AtrAss();
+  virtual void accept(Visitor *v);
+  virtual AtrAss *clone() const;
+  void swap(AtrAss &);
 };
 
 class Incr : public Stmt

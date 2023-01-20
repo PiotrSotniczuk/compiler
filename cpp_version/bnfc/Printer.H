@@ -53,6 +53,7 @@ class PrintAbsyn : public Visitor
   void visitBStmt(BStmt *p);
   void visitDecl(Decl *p);
   void visitAss(Ass *p);
+  void visitAtrAss(AtrAss *p);
   void visitIncr(Incr *p);
   void visitDecr(Decr *p);
   void visitRet(Ret *p);
@@ -207,6 +208,7 @@ class ShowAbsyn : public Visitor
   void visitBStmt(BStmt *p);
   void visitDecl(Decl *p);
   void visitAss(Ass *p);
+  void visitAtrAss(AtrAss *p);
   void visitIncr(Incr *p);
   void visitDecr(Decr *p);
   void visitRet(Ret *p);
