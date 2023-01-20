@@ -492,12 +492,11 @@ class AtrAss : public Stmt
 {
 public:
   Expr *expr_1;
-  Ident ident_;
   Expr *expr_2;
 
   AtrAss(const AtrAss &);
   AtrAss &operator=(const AtrAss &);
-  AtrAss(Expr *p1, Ident p2, Expr *p3);
+  AtrAss(Expr *p1, Expr *p2);
   ~AtrAss();
   virtual void accept(Visitor *v);
   virtual AtrAss *clone() const;

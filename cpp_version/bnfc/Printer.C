@@ -345,11 +345,10 @@ void PrintAbsyn::visitAtrAss(AtrAss *p)
   int oldi = _i_;
   if (oldi > 0) render(_L_PAREN);
 
-  _i_ = 0; p->expr_1->accept(this);
-  render('.');
-  visitIdent(p->ident_);
+  _i_ = 7; p->expr_1->accept(this);
   render('=');
   _i_ = 0; p->expr_2->accept(this);
+  render(';');
 
   if (oldi > 0) render(_R_PAREN);
 
@@ -1237,9 +1236,8 @@ void ShowAbsyn::visitAtrAss(AtrAss *p)
   bufAppend(' ');
   p->expr_1->accept(this);
   bufAppend(' ');
-  visitIdent(p->ident_);
-  bufAppend(' ');
   p->expr_2->accept(this);
+  bufAppend(' ');
   bufAppend(')');
 }
 void ShowAbsyn::visitIncr(Incr *p)

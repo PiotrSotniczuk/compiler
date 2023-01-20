@@ -66,11 +66,11 @@ Program* pProgram(const char *str);
 #define _SYMB_1 264
 #define _SYMB_15 265
 #define _SYMB_14 266
-#define _SYMB_8 267
+#define _SYMB_7 267
 #define _SYMB_4 268
 #define _SYMB_10 269
-#define _SYMB_9 270
-#define _SYMB_7 271
+#define _SYMB_8 270
+#define _SYMB_9 271
 #define _SYMB_16 272
 #define _SYMB_5 273
 #define _SYMB_18 274

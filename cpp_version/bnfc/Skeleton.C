@@ -145,7 +145,6 @@ void Skeleton::visitAtrAss(AtrAss *atr_ass)
   /* Code For AtrAss Goes Here */
 
   if (atr_ass->expr_1) atr_ass->expr_1->accept(this);
-  visitIdent(atr_ass->ident_);
   if (atr_ass->expr_2) atr_ass->expr_2->accept(this);
 
 }

@@ -611,18 +611,16 @@ Ass *Ass::clone() const
 
 
 /********************   AtrAss    ********************/
-AtrAss::AtrAss(Expr *p1, Ident p2, Expr *p3)
+AtrAss::AtrAss(Expr *p1, Expr *p2)
 {
   expr_1 = p1;
-  ident_ = p2;
-  expr_2 = p3;
+  expr_2 = p2;
 
 }
 
 AtrAss::AtrAss(const AtrAss & other)
 {
   expr_1 = other.expr_1->clone();
-  ident_ = other.ident_;
   expr_2 = other.expr_2->clone();
 
 }
@@ -637,7 +635,6 @@ AtrAss &AtrAss::operator=(const AtrAss & other)
 void AtrAss::swap(AtrAss & other)
 {
   std::swap(expr_1, other.expr_1);
-  std::swap(ident_, other.ident_);
   std::swap(expr_2, other.expr_2);
 
 }

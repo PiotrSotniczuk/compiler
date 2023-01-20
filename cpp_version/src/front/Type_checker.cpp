@@ -162,14 +162,14 @@ void TypeChecker::visitRet(Ret *ret)
 {
   ret->expr_->accept(this);
   if(!type_compatible(this->act_fun_type, this->expr_type)){
-    go_error(ret->line_number, "Return type does not match function type.");
+    go_error(ret->line_number, "Returned type " + this->expr_type + " does not match function type " + this->act_fun_type);
   }
 }
 
 void TypeChecker::visitVRet(VRet *v_ret)
 {
   if(this->act_fun_type != "void"){
-    go_error(v_ret->line_number, "Return type does not match function type.");
+    go_error(v_ret->line_number, "Returns void but function type is " + this->act_fun_type);
   }
 }
 
@@ -360,6 +360,7 @@ void TypeChecker::visitEAnd(EAnd *e_and)
   if(this->expr_type != "boolean"){
     go_error(e_and->line_number, "Expression is not 'boolean'.");
   }
+  this->expr_type = "boolean";
 }
 
 void TypeChecker::visitEOr(EOr *e_or)
@@ -372,6 +373,7 @@ void TypeChecker::visitEOr(EOr *e_or)
   if(this->expr_type != "boolean"){
     go_error(e_or->line_number, "Expression is not 'boolean'.");
   }
+  this->expr_type = "boolean";
 }
 
 void TypeChecker::visitEClsAt(EClsAt *e_cls_at)
@@ -380,9 +382,18 @@ void TypeChecker::visitEClsAt(EClsAt *e_cls_at)
 
   e_cls_at->expr_->accept(this);
   string cls_type = this->expr_type;
-  auto attrs = this->classes.find(cls_type)->second.attrs;
-  auto atr_it = attrs.find(make_pair(e_cls_at->ident_, cls_type));
-  this->expr_type = atr_it->second.first;
+  auto cls_it = this->classes.find(cls_type);
+  if(cls_it == this->classes.end()){
+    go_error(e_cls_at->line_number, "You are trying to reach Atr of class " + cls_type + " that was not decleared.");
+  }
+
+  for (auto const& [key, val] : cls_it->second.attrs){
+    if(key.first == e_cls_at->ident_){
+      this->expr_type = val.first;
+      return;
+    }
+  }
+  go_error(e_cls_at->line_number, "There is no Atr " + e_cls_at->ident_ + " in class " + cls_type); 
 }
 
 void TypeChecker::visitEClsApp(EClsApp *e_cls_app)
@@ -421,6 +432,7 @@ void TypeChecker::visitENull(ENull *e_null)
   if(this->classes.find(this->last_type) == this->classes.end()){
     go_error(e_null->line_number, "You can only cast Object types.");
   }
+  this->expr_type = this->last_type;
 }
 
 void TypeChecker::visitClsType(ClsType *cls_type)
@@ -458,17 +470,16 @@ bool TypeChecker::type_compatible(string l_type, string r_type){
 void TypeChecker::visitAtrAss(AtrAss *atr_ass)
 {
   /* Code For AtrAss Goes Here */
-  atr_ass->expr_1->accept(this);
-  string cls_t = this->expr_type;
-  auto cls_it = this->classes.find(cls_t);
-  assert(cls_it != this->classes.end());
-  auto atr_it = cls_it->second.attrs.find(make_pair(atr_ass->ident_, cls_t));
-  if(atr_it == cls_it->second.attrs.end()){
-    go_error(atr_ass->line_number, "This attribute doesn't exist in class " + cls_t);
+  EClsAt* l_side = dynamic_cast<EClsAt*>(atr_ass->expr_1);
+  if(!l_side){
+    go_error(atr_ass->line_number, "You are trying to assing to something that is not Class.Atr.");
   }
 
+  atr_ass->expr_1->accept(this);
+  string l_side_t = this->expr_type;
+
   atr_ass->expr_2->accept(this);
-  if(!type_compatible(atr_it->second.first, this->expr_type)){
+  if(!type_compatible(l_side_t, this->expr_type)){
     go_error(atr_ass->line_number, "Type of atr does not match type of expresion");
   }
 }

@@ -46,7 +46,7 @@ separator nonempty Item "," ;
 
 Ass.       Stmt ::= Ident "=" Expr  ";" ;
 
-AtrAss.    Stmt ::= Expr "." Ident "=" Expr;
+AtrAss.    Stmt ::= Expr7 "=" Expr ";";
 
 Incr.      Stmt ::= Ident "++"  ";" ;
 
