@@ -97,18 +97,19 @@ void FindDef::visitClsDef(ClsDef *cls_def)
       fun->listarg_->accept(this);
       
       int fun_offset = new_class.vtab.size();
-      auto to_insert_sec = make_tuple(cls_name, ret_type, this->arg_types, fun_offset);
       auto base_fun = new_class.vtab.find(fun->ident_);
-       if(base_fun == new_class.vtab.end()){
-         // insert normal function
-         new_class.vtab.emplace(make_pair(fun->ident_, to_insert_sec));
-       }else{
-         // there already is a funciton in this class
-         if(get<0>(base_fun->second) == cls_name){
-           go_error(fun->line_number, "This method " + fun->ident_ + " was already declared in this class");
-         }
-         base_fun->second = to_insert_sec;
-       }
+      if(base_fun == new_class.vtab.end()){
+        // insert normal function
+        auto to_insert_sec = make_tuple(cls_name, ret_type, this->arg_types, fun_offset);
+        new_class.vtab.emplace(make_pair(fun->ident_, to_insert_sec));
+      }else{
+        // there already is a funciton in this class
+        if(get<0>(base_fun->second) == cls_name){
+          go_error(fun->line_number, "This method " + fun->ident_ + " was already declared in this class");
+        }
+        auto to_insert_sec = make_tuple(cls_name, ret_type, this->arg_types, get<3>(base_fun->second));
+        base_fun->second = to_insert_sec;
+      }
     }
   }
   this->classes.emplace(make_pair(cls_name, new_class));

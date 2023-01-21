@@ -98,13 +98,30 @@ vector<string> split_str(const string &s, char delim) {
 namespace fs = std::filesystem;
 string HEADER = "\t.intel_syntax noprefix\n" + string("\t.globl main\n");
 
+string get_vtabs(map<string, Klass> classes){
+	string ret = "";
+   	for (auto const& [name, klass] : classes){
+    	ret += ".vtab_" + name + ":\n";
+		vector<string> in_order(klass.vtab.size());
+		for (auto const& [fun_name, tup] : klass.vtab){
+			int offset = get<3>(tup);
+			string cls_name = get<0>(tup);
+			in_order[offset] = cls_name + "_" + fun_name;
+		}
+		for (auto const& elem : in_order){
+			ret += "\t.long _" + elem + "\n";
+		}
+  	}
+	return ret;
+}
+
 void backend(Program *parse_tree, char *filepath, char **argv){
    // get function definitions
 	FindDef *fdef = new FindDef();
 	fdef->run(parse_tree);
 
 	// generate x86 code
-	Compiler *comp = new Compiler(fdef->funs);
+	Compiler *comp = new Compiler(fdef->funs, fdef->classes);
 	comp->run(parse_tree);
 	string content = comp->full_code;
 	
@@ -115,8 +132,9 @@ void backend(Program *parse_tree, char *filepath, char **argv){
 		string safe_str = sanitize(pair.first);
 		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + safe_str + "\"\n";
 	}
+   string vtabs = get_vtabs(fdef->classes);
 
-	string optimized = remove_redundant_lines(HEADER + local_const_string + content);
+	string optimized = remove_redundant_lines(HEADER + local_const_string + vtabs + content);
 
 	// generating assembly file
     string asm_file = fs::path(filepath).replace_extension("s");

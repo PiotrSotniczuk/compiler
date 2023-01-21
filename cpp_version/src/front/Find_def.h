@@ -15,7 +15,7 @@ class Klass {
         string ext;
         // <name, klas> <type, offset>
         map<pair<string, string>, pair<string, int>> attrs;
-// function table: name, class, ret_type, args[type]
+// function table: name, class, ret_type, args[type], offset
         map<string, tuple<string, string, vector<string>, int>> vtab;
         Klass(void){
             size = 1;

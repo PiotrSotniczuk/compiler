@@ -3,6 +3,7 @@
 
 #include "../../bnfc/Skeleton.H"
 #include "../../bnfc/Absyn.H"
+#include "../front/Find_def.h"
 #include <map>
 #include <list>
 
@@ -11,7 +12,7 @@ using namespace std;
 // class to generate code from parse tree
 class Compiler : public Skeleton {
     public:
-        Compiler(map<string, pair<string, vector<string>>> funs){
+        Compiler(map<string, pair<string, vector<string>>> funs, map<string, Klass> classes){
             this->full_code = "";
             this->act_code = "";
             this->local_const = map<string, int>();
@@ -20,10 +21,12 @@ class Compiler : public Skeleton {
             this->vars_size = 0;
             this->expr_type = "";
             this->funs = funs;
+            this->classes = classes;
         };
         string full_code;
         // <var_name, place>
         map<string, int> local_const;
+        map<string, Klass> classes;
     private:
         // functions definitions
         map<string, pair<string, vector<string>>> funs;
