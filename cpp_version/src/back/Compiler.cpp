@@ -1,6 +1,10 @@
 #include "Compiler.h"
 #include <vector>
 #include "../Shared.h"
+#include <cassert>
+#include <iostream>
+
+using namespace std;
 
 // adds /t and /n to line of asm code
 string add_t_n(vector<string> instr){
@@ -13,6 +17,30 @@ string add_t_n(vector<string> instr){
         ret += s + "\n";
     }
     return ret;
+}
+
+vector<string> Compiler::get_ext_vec(string c){
+    vector<string> ret = vector<string>();
+    while(c != ""){
+        ret.push_back(c);
+        auto c_it = this->classes.find(c);
+        assert(c_it != this->classes.end());
+                
+        c = c_it->second.ext;
+    }
+    return ret;
+}
+
+pair<string, int> Compiler::get_atr_vals(string ident){
+    auto exts = get_ext_vec(this->act_class);
+    auto cls = this->classes.find(this->act_class)->second;
+    for(string ext : exts){
+        auto attr_it = cls.attrs.find(make_pair(ident, ext));
+        if(attr_it != cls.attrs.end()){
+            return attr_it->second;
+        }
+    }
+    assert(false);
 }
 
 // give string a place in Local Constants
@@ -44,6 +72,43 @@ void Compiler::visitFnDef(FnDef *fn_def){
 
     // add return at the end if type is void
     Void* type_void = dynamic_cast<Void*>(fn_def->type_);
+    if (type_void && (!endsWith(this->act_code, "\tret\n"))){
+        this->act_code += add_t_n({"leave", "ret"});
+    }
+
+    this->full_code += fun_prefix + this->act_code;
+}
+
+
+void Compiler::visitClsDef(ClsDef *cls){
+    this->vars_offsets.push_front(map<string, pair<string,int>>());
+
+    this->act_class = cls->ident_;
+    cls->listclsdecl_->accept(this);
+    this->vars_offsets.pop_front();
+    this->act_class = "";
+}
+
+void Compiler::visitClsFun(ClsFun *cls_fun){
+    string fun_prefix = "_" + this->act_class + "_" + cls_fun->ident_ + ":\n";
+    fun_prefix += add_t_n({"push ebp", "mov ebp, esp"});
+
+    this->act_code = "";
+    this->vars_size = 0;
+
+    // add first env
+    this->vars_offsets.push_front(map<string, pair<string, int>>());
+    cls_fun->listarg_->accept(this);
+
+    Blk* blk = dynamic_cast<Blk*>(cls_fun->block_);
+    blk->liststmt_->accept(this);
+    this->vars_offsets.pop_front();
+
+    // reserve space for local variables
+    fun_prefix += add_t_n({"sub esp, " + to_string(this->vars_size*4)});
+
+    // add return at the end if type is void
+    Void* type_void = dynamic_cast<Void*>(cls_fun->type_);
     if (type_void && (!endsWith(this->act_code, "\tret\n"))){
         this->act_code += add_t_n({"leave", "ret"});
     }
@@ -299,6 +364,9 @@ void Compiler::visitBlk(Blk *blk){
 // sets directions to arguments in vats_offsets (above ret in stack)
 void Compiler::visitListArg(ListArg *list_arg){
     int offset = 2*4;
+    if(this->act_class != ""){
+        offset += 4; // place for self
+    }
     for (ListArg::iterator i = list_arg->begin() ; i != list_arg->end() ; ++i){
         (*i)->accept(this);
         string t = this->last_type;
@@ -347,14 +415,14 @@ void Compiler::visitInit(Init *init){
 }
 
 // get type and offset on stack from var_name
-pair<string, int> Compiler::get_var(string var){
+tuple<bool, string, int> Compiler::get_var(string var){
     for (auto const& mapa : this->vars_offsets){
         auto it = mapa.find(var);
         if(it != mapa.end()){
-            return it->second;
+            return make_tuple(true, it->second.first, it->second.second);
         }
     }
-    return pair<string, int>();
+    return make_tuple(false, "", 0);
 }
 
 // when writing offset print '+' if positive and nothing if negative
@@ -365,37 +433,70 @@ string offset_str(int offset){
 }
 
 void Compiler::visitAss(Ass *ass){
-    visitIdent(ass->ident_);
     ass->expr_->accept(this);
-    int byte_off = get_var(ass->ident_).second;
-
+    auto var_val = get_var(ass->ident_);
+    if(get<0>(var_val) == true){
+        this->act_code += add_t_n({
+            "pop eax", "mov dword ptr [ebp" + offset_str(get<2>(var_val)) + ("], eax")
+        }); 
+        return;
+    }
+    auto atr_vals = get_atr_vals(ass->ident_);
     this->act_code += add_t_n({
-        "pop eax", "mov dword ptr [ebp" + offset_str(byte_off) + ("], eax")
-    }); 
+        "pop eax",
+        "mov ecx, dword ptr [ebp+8]", // self 
+        "mov dword ptr [ecx+" + to_string(atr_vals.second*4) + "], eax" 
+    });   
 }
 
 void Compiler::visitIncr(Incr *incr){
-    visitIdent(incr->ident_);
-    int byte_off = get_var(incr->ident_).second;
-
+    auto var_val = get_var(incr->ident_);
+    if(get<0>(var_val) == true){
+        this->act_code += add_t_n({
+            "inc dword ptr [ebp" + offset_str(get<2>(var_val)) + "]"
+        }); 
+        return;
+    }
+    auto atr_vals = get_atr_vals(incr->ident_);
     this->act_code += add_t_n({
-        "inc dword ptr [ebp" + offset_str(byte_off) + "]"
+        "mov ecx, dword ptr [ebp+8]", // self 
+        "inc dword ptr [ecx+" + to_string(atr_vals.second*4) + "]"
     });
 }
 
 void Compiler::visitDecr(Decr *decr){
-    visitIdent(decr->ident_);
-    int byte_off = get_var(decr->ident_).second;
+    auto var_val = get_var(decr->ident_);
+    if(get<0>(var_val) == true){
+        this->act_code += add_t_n({
+            "dec dword ptr [ebp" + offset_str(get<2>(var_val)) + "]"
+        }); 
+        return;
+    }
+    auto atr_vals = get_atr_vals(decr->ident_);
     this->act_code += add_t_n({
-        "dec dword ptr [ebp" + offset_str(byte_off) + "]"
+        "mov ecx, [ebp+8]", // self 
+        "dec dword ptr [ecx+" + to_string(atr_vals.second*4) + "]"
     });
 }
 
 void Compiler::visitEVar(EVar *e_var){
-    visitIdent(e_var->ident_);
-    int byte_off = get_var(e_var->ident_).second;
+    // TODO jesli nie bibliotece to zobacz czy jestes w klasie
+    // najpierw załaduj adres z self a potem offset z tamtego kurwa
+    auto in_vars = get_var(e_var->ident_);
+    if(get<0>(in_vars)){
+        this->act_code += add_t_n({
+            "push [ebp" + offset_str(get<2>(in_vars)) + "]"
+        });
+        this->expr_type = get<1>(in_vars);
+        return;
+    }
+    assert(this->act_class != "");
+    
+    // what if it is class var
+    auto atr_vals = get_atr_vals(e_var->ident_);
     this->act_code += add_t_n({
-        "push [ebp" + offset_str(byte_off) + "]"
+        "mov eax, dword ptr [ebp+8]", // self 
+        "push [eax+" + to_string(atr_vals.second*4) + "]" 
     });
-    this->expr_type = get_var(e_var->ident_).first;
+    this->expr_type = atr_vals.first;
 }

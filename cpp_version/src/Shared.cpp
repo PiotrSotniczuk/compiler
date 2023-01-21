@@ -132,7 +132,7 @@ void backend(Program *parse_tree, char *filepath, char **argv){
 		string safe_str = sanitize(pair.first);
 		local_const_string += ".LC" + to_string(pair.second) + ":\n\t.string \"" + safe_str + "\"\n";
 	}
-   string vtabs = get_vtabs(fdef->classes);
+	string vtabs = get_vtabs(fdef->classes);
 
 	string optimized = remove_redundant_lines(HEADER + local_const_string + vtabs + content);
 

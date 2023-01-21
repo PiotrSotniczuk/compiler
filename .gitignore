@@ -11,3 +11,4 @@ test.s
 lattests/good/*.myout
 lattests/good/*.s
 lattests/good/
+good_copy

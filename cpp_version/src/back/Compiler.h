@@ -22,6 +22,7 @@ class Compiler : public Skeleton {
             this->expr_type = "";
             this->funs = funs;
             this->classes = classes;
+            this->act_class = "";
         };
         string full_code;
         // <var_name, place>
@@ -31,6 +32,7 @@ class Compiler : public Skeleton {
         // functions definitions
         map<string, pair<string, vector<string>>> funs;
         int vars_size;
+        string act_class;
         string expr_type;
         // list of envs, map of <var_name, (type, offset on stack)>
         list<map<string, pair<string, int>>> vars_offsets;
@@ -38,7 +40,9 @@ class Compiler : public Skeleton {
         int label_count;
         int get_l_count(){return label_count++;}
         // get var from envs
-        pair<string, int> get_var(string var);
+        tuple<bool, string, int> get_var(string var);
+        vector<string> get_ext_vec(string c);
+        pair<string, int> get_atr_vals(string ident);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);
@@ -67,10 +71,18 @@ class Compiler : public Skeleton {
         virtual void visitIncr(Incr *incr);
         virtual void visitDecr(Decr *decr);
         virtual void visitEVar(EVar *e_var);
+        virtual void visitClsDef(ClsDef *cls);
+        virtual void visitClsFun(ClsFun *cls_fun);
+        virtual void visitClsAtr(__attribute__((unused)) ClsAtr *cls_atr){};
         // virtual void ;
         // virtual void ;
         // virtual void ;
         // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+        // virtual void ;
+
 };
 
 #endif

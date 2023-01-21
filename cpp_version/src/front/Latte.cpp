@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 	
 	cerr << "OK\n";
 
-	//backend(parse_tree, filepath, argv);
+	backend(parse_tree, filepath, argv);
 
 	return 0;
 }

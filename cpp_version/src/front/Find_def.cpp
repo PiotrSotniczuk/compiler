@@ -77,7 +77,7 @@ void FindDef::visitClsDef(ClsDef *cls_def)
         }
         Init* init = dynamic_cast<Init*>(*i);
         if(init){
-          atr_ident = init->ident_;
+          go_error(atr->line_number, "Attribute " + atr_ident + " cannot be initialized");
         }
 
         auto to_insert = make_pair(make_pair(atr_ident, cls_name), make_pair(dec_t, new_class.size));
