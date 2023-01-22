@@ -334,7 +334,7 @@ void TypeChecker::visitERel(ERel *e_rel)
   e_rel->relop_->accept(this);
   e_rel->expr_2->accept(this);
   string type2 = this->expr_type;
-  if(type1 != type2){
+  if(!(type_compatible(type1, type2) ||  type_compatible(type2, type1))){
     go_error(e_rel->line_number, "Types does not match.");
   }
   EQU* equ = dynamic_cast<EQU*>(e_rel->relop_);

@@ -85,6 +85,7 @@ void Compiler::visitFnDef(FnDef *fn_def){
 
 void Compiler::visitClsDef(ClsDef *cls){
     this->vars_offsets.push_front(map<string, pair<string,int>>());
+    this->vars_offsets.begin()->emplace(make_pair("self", make_pair(cls->ident_, 8)));
 
     this->act_class = cls->ident_;
     cls->listclsdecl_->accept(this);

@@ -650,6 +650,21 @@ void PrintAbsyn::visitNewCls(NewCls *p)
   _i_ = oldi;
 }
 
+void PrintAbsyn::visitEApp(EApp *p)
+{
+  int oldi = _i_;
+  if (oldi > 7) render(_L_PAREN);
+
+  visitIdent(p->ident_);
+  render('(');
+  if(p->listexpr_) {_i_ = 0; p->listexpr_->accept(this);}
+  render(')');
+
+  if (oldi > 7) render(_R_PAREN);
+
+  _i_ = oldi;
+}
+
 void PrintAbsyn::visitENull(ENull *p)
 {
   int oldi = _i_;
@@ -695,21 +710,6 @@ void PrintAbsyn::visitELitFalse(ELitFalse *p)
   if (oldi > 6) render(_L_PAREN);
 
   render("false");
-
-  if (oldi > 6) render(_R_PAREN);
-
-  _i_ = oldi;
-}
-
-void PrintAbsyn::visitEApp(EApp *p)
-{
-  int oldi = _i_;
-  if (oldi > 6) render(_L_PAREN);
-
-  visitIdent(p->ident_);
-  render('(');
-  if(p->listexpr_) {_i_ = 0; p->listexpr_->accept(this);}
-  render(')');
 
   if (oldi > 6) render(_R_PAREN);
 
@@ -1454,6 +1454,19 @@ void ShowAbsyn::visitNewCls(NewCls *p)
   visitIdent(p->ident_);
   bufAppend(')');
 }
+void ShowAbsyn::visitEApp(EApp *p)
+{
+  bufAppend('(');
+  bufAppend("EApp");
+  bufAppend(' ');
+  visitIdent(p->ident_);
+  bufAppend(' ');
+  bufAppend('[');
+  if (p->listexpr_)  p->listexpr_->accept(this);
+  bufAppend(']');
+  bufAppend(' ');
+  bufAppend(')');
+}
 void ShowAbsyn::visitENull(ENull *p)
 {
   bufAppend('(');
@@ -1480,19 +1493,6 @@ void ShowAbsyn::visitELitTrue(ELitTrue *p)
 void ShowAbsyn::visitELitFalse(ELitFalse *p)
 {
   bufAppend("ELitFalse");
-}
-void ShowAbsyn::visitEApp(EApp *p)
-{
-  bufAppend('(');
-  bufAppend("EApp");
-  bufAppend(' ');
-  visitIdent(p->ident_);
-  bufAppend(' ');
-  bufAppend('[');
-  if (p->listexpr_)  p->listexpr_->accept(this);
-  bufAppend(']');
-  bufAppend(' ');
-  bufAppend(')');
 }
 void ShowAbsyn::visitEString(EString *p)
 {

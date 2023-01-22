@@ -79,11 +79,11 @@ class PrintAbsyn : public Visitor
   void visitEClsAt(EClsAt *p);
   void visitEClsApp(EClsApp *p);
   void visitNewCls(NewCls *p);
+  void visitEApp(EApp *p);
   void visitENull(ENull *p);
   void visitELitInt(ELitInt *p);
   void visitELitTrue(ELitTrue *p);
   void visitELitFalse(ELitFalse *p);
-  void visitEApp(EApp *p);
   void visitEString(EString *p);
   void visitNeg(Neg *p);
   void visitNot(Not *p);
@@ -234,11 +234,11 @@ class ShowAbsyn : public Visitor
   void visitEClsAt(EClsAt *p);
   void visitEClsApp(EClsApp *p);
   void visitNewCls(NewCls *p);
+  void visitEApp(EApp *p);
   void visitENull(ENull *p);
   void visitELitInt(ELitInt *p);
   void visitELitTrue(ELitTrue *p);
   void visitELitFalse(ELitFalse *p);
-  void visitEApp(EApp *p);
   void visitEString(EString *p);
   void visitNeg(Neg *p);
   void visitNot(Not *p);

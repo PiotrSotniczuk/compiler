@@ -739,7 +739,7 @@ static const yytype_int16 yyrline[] =
      183,   185,   186,   188,   189,   191,   192,   194,   196,   197,
      199,   200,   201,   202,   203,   204,   205,   206,   207,   208,
      209,   210,   211,   213,   214,   216,   217,   219,   220,   221,
-     222,   223,   229,   230,   232,   233,   234,   235,   237,   238,
+     222,   223,   229,   230,   232,   233,   234,   235,   236,   238,
      239,   240,   241,   242,   243,   245,   246,   247,   249,   250,
      252,   253,   255,   256,   258,   259,   261,   262,   264,   265,
      266,   268,   269,   271,   272,   273,   275,   276,   277,   278,
@@ -820,16 +820,16 @@ static const yytype_int8 yydefact[] =
        0,    11,     1,     6,     0,     0,     0,     8,    12,    15,
        9,     0,     0,     0,     8,     0,     7,     4,    16,     0,
       10,    18,     3,    33,    35,     0,     0,     8,     0,     0,
-      13,     0,     0,     0,    20,    51,     0,     0,     0,    50,
-       0,    17,    53,    49,    42,    21,    19,     0,    47,    54,
+      13,     0,     0,     0,    20,    52,     0,     0,     0,    51,
+       0,    17,    53,    50,    42,    21,    19,     0,    48,    54,
       57,    59,    61,    63,    65,    67,     0,     0,    42,    54,
       34,    33,    36,    56,    42,     0,     0,    55,     0,    46,
       28,     0,     0,    68,     0,     0,     0,     0,     0,     0,
       75,    73,    74,     0,    71,    72,     0,    81,     0,    76,
       77,    80,    78,    79,     0,     0,    32,     0,     0,    43,
        0,    27,     0,    69,     0,    25,    26,     0,    22,    44,
-       0,    58,    60,    64,    62,    66,    14,    48,     0,     0,
-      68,    52,    23,    68,    24,    29,    31,    70,     0,     0,
+       0,    58,    60,    64,    62,    66,    14,    49,     0,     0,
+      68,    47,    23,    68,    24,    29,    31,    70,     0,     0,
       45,    30
 };
 
@@ -930,7 +930,7 @@ static const yytype_int8 yyr1[] =
       50,    51,    51,    52,    52,    53,    53,    54,    55,    55,
       56,    56,    56,    56,    56,    56,    56,    56,    56,    56,
       56,    56,    56,    57,    57,    58,    58,    59,    59,    59,
-      59,    59,    60,    60,    61,    61,    61,    61,    62,    62,
+      59,    59,    60,    60,    61,    61,    61,    61,    61,    62,
       62,    62,    62,    62,    62,    63,    63,    63,    64,    64,
       65,    65,    66,    66,    67,    67,    68,    68,    69,    69,
       69,    70,    70,    71,    71,    71,    72,    72,    72,    72,
@@ -944,8 +944,8 @@ static const yytype_int8 yyr2[] =
        3,     0,     2,     3,     6,     0,     2,     3,     0,     2,
        1,     1,     3,     4,     4,     3,     3,     3,     2,     5,
        7,     5,     2,     1,     3,     1,     3,     1,     1,     1,
-       1,     1,     1,     3,     3,     6,     2,     1,     4,     1,
-       1,     1,     4,     1,     1,     2,     2,     1,     3,     1,
+       1,     1,     1,     3,     3,     6,     2,     4,     1,     4,
+       1,     1,     1,     1,     1,     2,     2,     1,     3,     1,
        3,     1,     3,     1,     3,     1,     3,     1,     0,     1,
        3,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1
@@ -1681,39 +1681,39 @@ yyreduce:
 #line 1680 "Parser.C"
     break;
 
-  case 47: /* Expr7: Expr8  */
+  case 47: /* Expr7: _IDENT_ _SYMB_0 ListExpr _SYMB_1  */
 #line 235 "LatteCPP.y"
-          {  (yyval.expr_) = (yyvsp[0].expr_);  }
+                                     {  std::reverse((yyvsp[-1].listexpr_)->begin(),(yyvsp[-1].listexpr_)->end()) ;(yyval.expr_) = new EApp((yyvsp[-3]._string), (yyvsp[-1].listexpr_)); (yyval.expr_)->line_number = yy_mylinenumber;  }
 #line 1686 "Parser.C"
     break;
 
-  case 48: /* Expr6: _SYMB_0 Type _SYMB_1 _SYMB_32  */
-#line 237 "LatteCPP.y"
-                                      {  (yyval.expr_) = new ENull((yyvsp[-2].type_)); (yyval.expr_)->line_number = yy_mylinenumber;  }
+  case 48: /* Expr7: Expr8  */
+#line 236 "LatteCPP.y"
+          {  (yyval.expr_) = (yyvsp[0].expr_);  }
 #line 1692 "Parser.C"
     break;
 
-  case 49: /* Expr6: _INTEGER_  */
+  case 49: /* Expr6: _SYMB_0 Type _SYMB_1 _SYMB_32  */
 #line 238 "LatteCPP.y"
-              {  (yyval.expr_) = new ELitInt((yyvsp[0]._int)); (yyval.expr_)->line_number = yy_mylinenumber;  }
+                                      {  (yyval.expr_) = new ENull((yyvsp[-2].type_)); (yyval.expr_)->line_number = yy_mylinenumber;  }
 #line 1698 "Parser.C"
     break;
 
-  case 50: /* Expr6: _SYMB_35  */
+  case 50: /* Expr6: _INTEGER_  */
 #line 239 "LatteCPP.y"
-             {  (yyval.expr_) = new ELitTrue(); (yyval.expr_)->line_number = yy_mylinenumber;  }
+              {  (yyval.expr_) = new ELitInt((yyvsp[0]._int)); (yyval.expr_)->line_number = yy_mylinenumber;  }
 #line 1704 "Parser.C"
     break;
 
-  case 51: /* Expr6: _SYMB_28  */
+  case 51: /* Expr6: _SYMB_35  */
 #line 240 "LatteCPP.y"
-             {  (yyval.expr_) = new ELitFalse(); (yyval.expr_)->line_number = yy_mylinenumber;  }
+             {  (yyval.expr_) = new ELitTrue(); (yyval.expr_)->line_number = yy_mylinenumber;  }
 #line 1710 "Parser.C"
     break;
 
-  case 52: /* Expr6: _IDENT_ _SYMB_0 ListExpr _SYMB_1  */
+  case 52: /* Expr6: _SYMB_28  */
 #line 241 "LatteCPP.y"
-                                     {  std::reverse((yyvsp[-1].listexpr_)->begin(),(yyvsp[-1].listexpr_)->end()) ;(yyval.expr_) = new EApp((yyvsp[-3]._string), (yyvsp[-1].listexpr_)); (yyval.expr_)->line_number = yy_mylinenumber;  }
+             {  (yyval.expr_) = new ELitFalse(); (yyval.expr_)->line_number = yy_mylinenumber;  }
 #line 1716 "Parser.C"
     break;
 

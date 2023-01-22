@@ -232,13 +232,13 @@ Expr8 : _IDENT_ {  $$ = new EVar($1); $$->line_number = yy_mylinenumber;  }
 Expr7 : Expr7 _SYMB_9 _IDENT_ {  $$ = new EClsAt($1, $3); $$->line_number = yy_mylinenumber;  }
   | Expr7 _SYMB_9 _IDENT_ _SYMB_0 ListExpr _SYMB_1 {  std::reverse($5->begin(),$5->end()) ;$$ = new EClsApp($1, $3, $5); $$->line_number = yy_mylinenumber;  }
   | _SYMB_31 _IDENT_ {  $$ = new NewCls($2); $$->line_number = yy_mylinenumber;  }
+  | _IDENT_ _SYMB_0 ListExpr _SYMB_1 {  std::reverse($3->begin(),$3->end()) ;$$ = new EApp($1, $3); $$->line_number = yy_mylinenumber;  }
   | Expr8 {  $$ = $1;  }
 ;
 Expr6 : _SYMB_0 Type _SYMB_1 _SYMB_32 {  $$ = new ENull($2); $$->line_number = yy_mylinenumber;  }
   | _INTEGER_ {  $$ = new ELitInt($1); $$->line_number = yy_mylinenumber;  }
   | _SYMB_35 {  $$ = new ELitTrue(); $$->line_number = yy_mylinenumber;  }
   | _SYMB_28 {  $$ = new ELitFalse(); $$->line_number = yy_mylinenumber;  }
-  | _IDENT_ _SYMB_0 ListExpr _SYMB_1 {  std::reverse($3->begin(),$3->end()) ;$$ = new EApp($1, $3); $$->line_number = yy_mylinenumber;  }
   | _STRING_ {  $$ = new EString($1); $$->line_number = yy_mylinenumber;  }
   | Expr7 {  $$ = $1;  }
 ;
