@@ -19,6 +19,7 @@ string add_t_n(vector<string> instr){
     return ret;
 }
 
+// get directed list of extenions
 vector<string> Compiler::get_ext_vec(string c){
     vector<string> ret = vector<string>();
     while(c != ""){
@@ -31,6 +32,7 @@ vector<string> Compiler::get_ext_vec(string c){
     return ret;
 }
 
+// get type and offset of atribute
 pair<string, int> Compiler::get_atr_vals(string c, string ident){
     assert(c != "");
     auto cls_it = this->classes.find(c);
@@ -458,10 +460,10 @@ void Compiler::visitAtrAss(AtrAss *atr_ass){
     EClsAt* l_side = dynamic_cast<EClsAt*>(atr_ass->expr_1);
     assert(l_side);
     // znajdz jaka to klasa
+    // self na [esp]
     l_side->expr_->accept(this);
     string cls_typ = this->expr_type;
-    
-    // self na [esp]
+     
     auto atr_vals = get_atr_vals(cls_typ, l_side->ident_);
 
     atr_ass->expr_2->accept(this);
@@ -474,15 +476,18 @@ void Compiler::visitAtrAss(AtrAss *atr_ass){
 
 void Compiler::visitIncr(Incr *incr){
     auto var_val = get_var(incr->ident_);
+    // normal
     if(get<0>(var_val) == true){
         this->act_code += add_t_n({
             "inc dword ptr [ebp" + offset_str(get<2>(var_val)) + "]"
         }); 
         return;
     }
+
+    // attr in class
     auto atr_vals = get_atr_vals(this->act_class, incr->ident_);
     this->act_code += add_t_n({
-        "mov ecx, dword ptr [ebp+8]", // self 
+        "mov ecx, dword ptr [ebp+8]", // self // self na [esp]
         "inc dword ptr [ecx+" + to_string(atr_vals.second*4) + "]"
     });
 }
@@ -503,8 +508,7 @@ void Compiler::visitDecr(Decr *decr){
 }
 
 void Compiler::visitEVar(EVar *e_var){
-    // TODO jesli nie bibliotece to zobacz czy jestes w klasie
-    // najpierw załaduj adres z self a potem offset z tamtego kurwa
+    // normal
     auto in_vars = get_var(e_var->ident_);
     if(get<0>(in_vars)){
         this->act_code += add_t_n({

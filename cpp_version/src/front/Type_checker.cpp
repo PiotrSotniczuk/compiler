@@ -135,7 +135,7 @@ void TypeChecker::visitClsDef(ClsDef *cls)
   auto cls_obj = this->classes.find(cls->ident_);
   assert(cls_obj != this->classes.end());
   for(auto atr : cls_obj->second.attrs){
-    // TODO moze tu dodaj tylko pierwszy jesli sie dziedzicza
+    // moze tu dodaj tylko pierwszy jesli sie dziedzicza
     this->vars.begin()->emplace(make_pair(atr.first.first, atr.second.first));
   }
   cls->listclsdecl_->accept(this);

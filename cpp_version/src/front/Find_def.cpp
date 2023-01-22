@@ -50,6 +50,7 @@ void FindDef::visitClsDef(ClsDef *cls_def)
   
   DoExt* ext = dynamic_cast<DoExt*>(cls_def->ext_);
   if(ext){
+    // if extends something than add everything from this class
     new_class.ext = ext->ident_;
     auto base_class = this->classes.find(ext->ident_);
     if(base_class == this->classes.end()){
@@ -67,6 +68,7 @@ void FindDef::visitClsDef(ClsDef *cls_def)
   for(; iter < end; iter++){
     ClsAtr* atr = dynamic_cast<ClsAtr*>(*iter);
     if(atr){
+      // add new atribute
       atr->type_->accept(this);
       string dec_t = this->last_type;
       for (ListItem::iterator i = atr->listitem_->begin() ; i != atr->listitem_->end() ; ++i){
@@ -90,6 +92,7 @@ void FindDef::visitClsDef(ClsDef *cls_def)
 
     ClsFun* fun = dynamic_cast<ClsFun*>(*iter);
     if(fun){
+      // add method
       fun->type_->accept(this);
       string ret_type = this->last_type;
 
@@ -99,11 +102,11 @@ void FindDef::visitClsDef(ClsDef *cls_def)
       int fun_offset = new_class.vtab.size();
       auto base_fun = new_class.vtab.find(fun->ident_);
       if(base_fun == new_class.vtab.end()){
-        // insert normal function
+        // insert new method
         auto to_insert_sec = make_tuple(cls_name, ret_type, this->arg_types, fun_offset);
         new_class.vtab.emplace(make_pair(fun->ident_, to_insert_sec));
       }else{
-        // there already is a funciton in this class
+        // there already is a funciton in extended class
         if(get<0>(base_fun->second) == cls_name){
           go_error(fun->line_number, "This method " + fun->ident_ + " was already declared in this class");
         }

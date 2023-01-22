@@ -98,6 +98,7 @@ vector<string> split_str(const string &s, char delim) {
 namespace fs = std::filesystem;
 string HEADER = "\t.intel_syntax noprefix\n" + string("\t.globl main\n");
 
+// generate code for vtab
 string get_vtabs(map<string, Klass> classes){
 	string ret = "";
    	for (auto const& [name, klass] : classes){
