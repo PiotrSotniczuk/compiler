@@ -42,7 +42,7 @@ class Compiler : public Skeleton {
         // get var from envs
         tuple<bool, string, int> get_var(string var);
         vector<string> get_ext_vec(string c);
-        pair<string, int> get_atr_vals(string ident);
+        pair<string, int> get_atr_vals(string c, string ident);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);
@@ -74,11 +74,11 @@ class Compiler : public Skeleton {
         virtual void visitClsDef(ClsDef *cls);
         virtual void visitClsFun(ClsFun *cls_fun);
         virtual void visitClsAtr(__attribute__((unused)) ClsAtr *cls_atr){};
-        // virtual void ;
-        // virtual void ;
-        // virtual void ;
-        // virtual void ;
-        // virtual void ;
+        virtual void visitEClsAt(EClsAt *e_cls_at);
+        virtual void visitEClsApp(EClsApp *e_cls_app);
+        virtual void visitNewCls(NewCls *new_cls);
+        virtual void visitENull(ENull *e_null);
+        virtual void visitAtrAss(AtrAss *atr_ass);
         // virtual void ;
         // virtual void ;
         // virtual void ;

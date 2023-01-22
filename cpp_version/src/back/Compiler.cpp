@@ -31,9 +31,12 @@ vector<string> Compiler::get_ext_vec(string c){
     return ret;
 }
 
-pair<string, int> Compiler::get_atr_vals(string ident){
-    auto exts = get_ext_vec(this->act_class);
-    auto cls = this->classes.find(this->act_class)->second;
+pair<string, int> Compiler::get_atr_vals(string c, string ident){
+    assert(c != "");
+    auto cls_it = this->classes.find(c);
+    assert(cls_it != this->classes.end());
+    auto exts = get_ext_vec(c);
+    auto cls = cls_it->second;
     for(string ext : exts){
         auto attr_it = cls.attrs.find(make_pair(ident, ext));
         if(attr_it != cls.attrs.end()){
@@ -441,12 +444,31 @@ void Compiler::visitAss(Ass *ass){
         }); 
         return;
     }
-    auto atr_vals = get_atr_vals(ass->ident_);
+    auto atr_vals = get_atr_vals(this->act_class, ass->ident_);
     this->act_code += add_t_n({
         "pop eax",
         "mov ecx, dword ptr [ebp+8]", // self 
         "mov dword ptr [ecx+" + to_string(atr_vals.second*4) + "], eax" 
     });   
+}
+
+void Compiler::visitAtrAss(AtrAss *atr_ass){
+  /* Code For AtrAss Goes Here */
+    EClsAt* l_side = dynamic_cast<EClsAt*>(atr_ass->expr_1);
+    assert(l_side);
+    // znajdz jaka to klasa
+    l_side->expr_->accept(this);
+    string cls_typ = this->expr_type;
+    
+    // self na [esp]
+    auto atr_vals = get_atr_vals(cls_typ, l_side->ident_);
+
+    atr_ass->expr_2->accept(this);
+    this->act_code += add_t_n({
+        "pop ecx",
+        "pop eax", // self
+        "mov dword ptr [eax+" + to_string(atr_vals.second*4) + "], ecx", // self  
+    });
 }
 
 void Compiler::visitIncr(Incr *incr){
@@ -457,7 +479,7 @@ void Compiler::visitIncr(Incr *incr){
         }); 
         return;
     }
-    auto atr_vals = get_atr_vals(incr->ident_);
+    auto atr_vals = get_atr_vals(this->act_class, incr->ident_);
     this->act_code += add_t_n({
         "mov ecx, dword ptr [ebp+8]", // self 
         "inc dword ptr [ecx+" + to_string(atr_vals.second*4) + "]"
@@ -472,7 +494,7 @@ void Compiler::visitDecr(Decr *decr){
         }); 
         return;
     }
-    auto atr_vals = get_atr_vals(decr->ident_);
+    auto atr_vals = get_atr_vals(this->act_class, decr->ident_);
     this->act_code += add_t_n({
         "mov ecx, [ebp+8]", // self 
         "dec dword ptr [ecx+" + to_string(atr_vals.second*4) + "]"
@@ -490,13 +512,83 @@ void Compiler::visitEVar(EVar *e_var){
         this->expr_type = get<1>(in_vars);
         return;
     }
-    assert(this->act_class != "");
     
     // what if it is class var
-    auto atr_vals = get_atr_vals(e_var->ident_);
+    auto atr_vals = get_atr_vals(this->act_class, e_var->ident_);
     this->act_code += add_t_n({
         "mov eax, dword ptr [ebp+8]", // self 
         "push [eax+" + to_string(atr_vals.second*4) + "]" 
     });
     this->expr_type = atr_vals.first;
+}
+
+void Compiler::visitEClsAt(EClsAt *e_cls_at){
+  /* Code For EClsAt Goes Here */
+    e_cls_at->expr_->accept(this);
+    string cls_typ = this->expr_type;
+    auto atr_vals = get_atr_vals(cls_typ, e_cls_at->ident_);
+    this->act_code += add_t_n({
+        "pop eax", // self 
+        "push [eax+" + to_string(atr_vals.second*4) + "]"
+    });
+    this->expr_type = atr_vals.first;
+}
+
+void Compiler::visitEClsApp(EClsApp *e_cls_app){
+    /* Code For EClsApp Goes Here */
+    // firstly put arguments on stack
+    e_cls_app->listexpr_->accept(this);
+
+    // put self on stack
+    e_cls_app->expr_->accept(this);
+    string e_typ = this->expr_type;
+    auto cls_it = this->classes.find(e_typ);
+    assert(cls_it != this->classes.end());
+
+    auto fun_it = cls_it->second.vtab.find(e_cls_app->ident_);
+    assert(fun_it != cls_it->second.vtab.end());
+
+    int offset = get<3>(fun_it->second);
+    int size = e_cls_app->listexpr_->size() + 1; // +1 for self in args
+    
+   // on top stack is self
+    this->act_code += add_t_n({
+        "mov eax, dword ptr [esp]", // eax points to self
+        "mov eax, dword ptr [eax]", // eax points to vtab
+        "mov eax, dword ptr [eax+4*" + to_string(offset)+"]", // eax points to fun vtab
+        "call eax", "add esp, " + to_string(size * 4)
+    });
+
+    this->expr_type = get<1>(fun_it->second);
+    if(this->expr_type != "void"){
+        this->act_code += add_t_n({"push eax"});
+    }
+}
+
+void Compiler::visitNewCls(NewCls *new_cls){
+  /* Code For NewCls Goes Here */
+    auto cls_it = classes.find(new_cls->ident_);
+    assert(cls_it != this->classes.end());
+    
+    int size = cls_it->second.size;
+
+    this->act_code += add_t_n({
+        "push 4",
+        "push " + to_string(size),
+        "call calloc",
+        "add esp, 8",
+        "lea ecx, .vtab_" + new_cls->ident_,
+        "mov dword ptr [eax], ecx",
+        "push eax",
+    });
+    this->expr_type = new_cls->ident_;
+}
+
+void Compiler::visitENull(ENull *e_null){
+  /* Code For ENull Goes Here */
+    e_null->type_->accept(this);
+    this->act_code += add_t_n({
+        "push 0"
+    });
+    this->expr_type = this->last_type;
 }
