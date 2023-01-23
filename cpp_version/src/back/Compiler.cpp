@@ -51,16 +51,34 @@ pair<string, int> Compiler::get_atr_vals(string c, string ident){
 }
 
 void Compiler::decr_env_str(map<string, pair<string, int>> env){
-    for (auto const& [name, type_offs] : env){
-        if(type_offs.first == "string"){
-            int off = type_offs.second;
+    for (auto const& [name, var_type_offs] : env){
+        string typ = var_type_offs.first;
+        int var_off = var_type_offs.second;
+        if(typ == "string"){
             this->act_code += add_t_n({
-                "push [ebp" + offset_str(off) + "]", 
+                "push [ebp" + offset_str(var_off) + "]", 
                 "call __garbDown",
                 "add esp, 4"
             });
+            continue;
         }
-        // TODO remove string from attributes
+        // remove strings from objects
+        auto cls_it = this->classes.find(typ);
+        if(cls_it != this->classes.end()){
+            auto klas = cls_it->second;
+            for (auto const& [name_cls, atr_type_offs] : klas.attrs){
+                if(atr_type_offs.first == "string"){
+                    int atr_off = atr_type_offs.second;
+                    this->act_code += add_t_n({
+                        "push [ebp" + offset_str(var_off) + "]", // self on top
+                        "pop eax", // self in 
+                        "push dword ptr [eax+" + to_string(atr_off*4) + "]", // str on top
+                        "call __garbDown",
+                        "add esp, 4"
+                    });
+                }
+            }
+        }
     }
 }
 
