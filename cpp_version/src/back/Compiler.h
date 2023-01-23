@@ -23,6 +23,7 @@ class Compiler : public Skeleton {
             this->funs = funs;
             this->classes = classes;
             this->act_class = "";
+            this->act_fun = "";
         };
         string full_code;
         // <var_name, place>
@@ -34,6 +35,7 @@ class Compiler : public Skeleton {
         int vars_size;
         string act_class;
         string expr_type;
+        string act_fun;
         // list of envs, map of <var_name, (type, offset on stack)>
         list<map<string, pair<string, int>>> vars_offsets;
         string act_code;

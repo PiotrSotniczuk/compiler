@@ -55,6 +55,7 @@ void Compiler::visitString(String x){
 }
 
 void Compiler::visitFnDef(FnDef *fn_def){
+    this->act_fun = fn_def->ident_;
     string fun_prefix = fn_def->ident_ + ":\n";
     fun_prefix += add_t_n({"push ebp", "mov ebp, esp"});
 
@@ -82,6 +83,7 @@ void Compiler::visitFnDef(FnDef *fn_def){
     }
 
     this->full_code += fun_prefix + this->act_code;
+    this->act_fun = "";
 }
 
 
@@ -128,6 +130,11 @@ void Compiler::visitVRet(__attribute__((unused)) VRet *v_ret){
 
 void Compiler::visitRet(Ret *ret){
     ret->expr_->accept(this);
+
+    if(this->act_fun == "main"){
+        // return val on top
+        this->act_code += add_t_n({"call _gcClean"});
+    }
     this->act_code += add_t_n({"pop eax", "leave", "ret"});
 }
 
