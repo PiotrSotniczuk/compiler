@@ -260,10 +260,25 @@ void Compiler::visitEApp(EApp *e_app){
     visitIdent(e_app->ident_);
     e_app->listexpr_->accept(this);
     int size = e_app->listexpr_->size();
-    this->act_code += add_t_n({
-        "call " + e_app->ident_, "add esp, " + to_string(size * 4)
-    });
+
     this->expr_type = this->funs.find(e_app->ident_)->second.first;
+    
+    if(e_app->ident_ == "printString"){ // clean argument
+        this->act_code += add_t_n({
+            "call printString",
+            "pop ecx", // to clean
+            "push eax",
+            "push ecx",
+            "call __garbDown", // cleaned
+            "add esp, 4", // 
+        });
+        return;
+    }
+
+    this->act_code += add_t_n({
+        "call " + e_app->ident_, 
+        "add esp, " + to_string(size * 4)
+    });
     if(this->expr_type != "void"){
         this->act_code += add_t_n({"push eax"});
     }
@@ -688,8 +703,7 @@ void Compiler::visitENull(ENull *e_null){
 void Compiler::visitSExp(SExp *s_exp){
     /* Code For SExp Goes Here */
     s_exp->expr_->accept(this);
-    EString* strLit = dynamic_cast<EString*>(s_exp->expr_);
-    if(strLit){
+    if(this->expr_type == "string"){
         this->act_code += add_t_n({
             "call __garbDown"
         });
