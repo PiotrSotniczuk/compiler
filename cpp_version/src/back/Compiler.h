@@ -16,7 +16,7 @@ class Compiler : public Skeleton {
             this->full_code = "";
             this->act_code = "";
             this->local_const = map<string, int>();
-            this->vars_offsets = list<map<string, pair<string, int>>>();
+            this->vars_offsets = list<pair<map<string, pair<string, int>>, bool>>();
             this->label_count = 0;
             this->vars_size = 0;
             this->expr_type = "";
@@ -36,8 +36,8 @@ class Compiler : public Skeleton {
         string act_class;
         string expr_type;
         string act_fun;
-        // list of envs, map of <var_name, (type, offset on stack)>
-        list<map<string, pair<string, int>>> vars_offsets;
+        // list of envs, map of <var_name, (type, offset on stack)> bool=if_function block
+        list<pair<map<string, pair<string, int>>, bool>> vars_offsets;
         string act_code;
         int label_count;
         int get_l_count(){return label_count++;}
@@ -45,6 +45,8 @@ class Compiler : public Skeleton {
         tuple<bool, string, int> get_var(string var);
         vector<string> get_ext_vec(string c);
         pair<string, int> get_atr_vals(string c, string ident);
+        void decr_env_str(map<string, pair<string, int>> env);
+        void decr_str_leaving(bool norm_block);
         virtual void visitString(String x);
         virtual void visitFnDef(FnDef *fn_def);
         virtual void visitRet(Ret *p);

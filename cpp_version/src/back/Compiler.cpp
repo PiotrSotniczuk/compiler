@@ -6,6 +6,8 @@
 
 using namespace std;
 
+string offset_str(int offset);
+
 // adds /t and /n to line of asm code
 string add_t_n(vector<string> instr){
     string ret = "";
@@ -48,6 +50,41 @@ pair<string, int> Compiler::get_atr_vals(string c, string ident){
     assert(false);
 }
 
+void Compiler::decr_env_str(map<string, pair<string, int>> env){
+    for (auto const& [name, type_offs] : env){
+        if(type_offs.first == "string"){
+            int off = type_offs.second;
+            this->act_code += add_t_n({
+                "push [ebp" + offset_str(off) + "]", 
+                "call _gcDecr",
+                "add esp, 4"
+            });
+        }
+    }
+}
+
+void Compiler::decr_str_leaving(bool end_block){
+    // clean when leaving block only block 
+    // clean when leaving function all until function
+    if(end_block){
+        auto last_env = this->vars_offsets.begin()->first;
+        // decr all strings in map
+        decr_env_str(last_env);
+        return;
+    }
+
+    auto env_it = this->vars_offsets.begin();
+    while(true){
+        auto env = env_it->first;
+        decr_env_str(env);
+        bool fun_env = env_it->second;
+        if(fun_env){
+            return;
+        } 
+        env_it++;
+    }
+}
+
 // give string a place in Local Constants
 void Compiler::visitString(String x){
     int size = this->local_const.size();
@@ -66,12 +103,11 @@ void Compiler::visitFnDef(FnDef *fn_def){
     visitIdent(fn_def->ident_);
 
     // add first env
-    this->vars_offsets.push_front(map<string, pair<string, int>>());
+    this->vars_offsets.push_front(make_pair(map<string, pair<string, int>>(), true));
     fn_def->listarg_->accept(this);
 
     Blk* blk = dynamic_cast<Blk*>(fn_def->block_);
     blk->liststmt_->accept(this);
-    this->vars_offsets.pop_front();
 
     // reserve space for local variables
     fun_prefix += add_t_n({"sub esp, " + to_string(this->vars_size*4)});
@@ -79,20 +115,23 @@ void Compiler::visitFnDef(FnDef *fn_def){
     // add return at the end if type is void
     Void* type_void = dynamic_cast<Void*>(fn_def->type_);
     if (type_void && (!endsWith(this->act_code, "\tret\n"))){
+        decr_str_leaving(true);
         this->act_code += add_t_n({"leave", "ret"});
     }
 
     this->full_code += fun_prefix + this->act_code;
     this->act_fun = "";
+    this->vars_offsets.pop_front();
 }
 
 
 void Compiler::visitClsDef(ClsDef *cls){
-    this->vars_offsets.push_front(map<string, pair<string,int>>());
-    this->vars_offsets.begin()->emplace(make_pair("self", make_pair(cls->ident_, 8)));
+    this->vars_offsets.push_front(make_pair(map<string, pair<string, int>>(), false));
+    this->vars_offsets.begin()->first.emplace(make_pair("self", make_pair(cls->ident_, 8)));
 
     this->act_class = cls->ident_;
     cls->listclsdecl_->accept(this);
+    decr_str_leaving(true);
     this->vars_offsets.pop_front();
     this->act_class = "";
 }
@@ -105,7 +144,7 @@ void Compiler::visitClsFun(ClsFun *cls_fun){
     this->vars_size = 0;
 
     // add first env
-    this->vars_offsets.push_front(map<string, pair<string, int>>());
+    this->vars_offsets.push_front(make_pair(map<string, pair<string, int>>(), true));
     cls_fun->listarg_->accept(this);
 
     Blk* blk = dynamic_cast<Blk*>(cls_fun->block_);
@@ -118,6 +157,7 @@ void Compiler::visitClsFun(ClsFun *cls_fun){
     // add return at the end if type is void
     Void* type_void = dynamic_cast<Void*>(cls_fun->type_);
     if (type_void && (!endsWith(this->act_code, "\tret\n"))){
+        decr_str_leaving(true);
         this->act_code += add_t_n({"leave", "ret"});
     }
 
@@ -125,11 +165,14 @@ void Compiler::visitClsFun(ClsFun *cls_fun){
 }
 
 void Compiler::visitVRet(__attribute__((unused)) VRet *v_ret){
+    decr_str_leaving(false);
     this->act_code += add_t_n({"leave", "ret"});
 }
 
 void Compiler::visitRet(Ret *ret){
     ret->expr_->accept(this);
+
+    decr_str_leaving(false);
 
     if(this->act_fun == "main"){
         // return val on top
@@ -381,8 +424,9 @@ void Compiler::visitERel(ERel *e_rel){
 
 void Compiler::visitBlk(Blk *blk){
     // new env
-    this->vars_offsets.push_front(map<string, pair<string, int>>());
+    this->vars_offsets.push_front(make_pair(map<string, pair<string, int>>(), false));
     blk->liststmt_->accept(this);
+    decr_str_leaving(true);
     this->vars_offsets.pop_front();
 }
 
@@ -396,7 +440,7 @@ void Compiler::visitListArg(ListArg *list_arg){
         (*i)->accept(this);
         string t = this->last_type;
         Ar* ar = dynamic_cast<Ar*>(*i);
-        this->vars_offsets.begin()->emplace(make_pair(ar->ident_, make_pair(t, offset)));
+        this->vars_offsets.begin()->first.emplace(make_pair(ar->ident_, make_pair(t, offset)));
         offset += 4;
     }
 }
@@ -407,12 +451,12 @@ void Compiler::visitNoInit(NoInit *no_init){
 
     string type = this->last_type;
     // set direction to this variable
-    this->vars_offsets.begin()->emplace(make_pair(no_init->ident_, make_pair(type, offset)));
+    this->vars_offsets.begin()->first.emplace(make_pair(no_init->ident_, make_pair(type, offset)));
 
     if(type == "string"){
         // init strings as ""
         this->act_code += add_t_n({
-            "mov eax, .LC_empty_str",
+            "lea eax, .LC_empty_str",
             "push eax",
             "call _copyStr", 
             "add esp, 4",
@@ -435,7 +479,7 @@ void Compiler::visitInit(Init *init){
     this->vars_size++;
     init->expr_->accept(this);
 
-    this->vars_offsets.begin()->emplace(make_pair(init->ident_, make_pair(t, offset)));
+    this->vars_offsets.begin()->first.emplace(make_pair(init->ident_, make_pair(t, offset)));
 
     // if string garb colec incr on var but decr of expr so zero
     this->act_code += add_t_n({
@@ -445,7 +489,8 @@ void Compiler::visitInit(Init *init){
 
 // get type and offset on stack from var_name
 tuple<bool, string, int> Compiler::get_var(string var){
-    for (auto const& mapa : this->vars_offsets){
+    for (auto const& p : this->vars_offsets){
+        auto mapa = p.first;
         auto it = mapa.find(var);
         if(it != mapa.end()){
             return make_tuple(true, it->second.first, it->second.second);
