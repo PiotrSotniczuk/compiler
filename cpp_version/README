@@ -1,8 +1,9 @@
 Projekt jest napisany w C++, ale w standardzie C++17!
 
 ROZSZERZENIA
-Dopisałem struktury, obiekty oraz metody wirtualne.
-Jeśli nie będzie w nich błędu będę miał w sumie 3.8+7+(10) = 20.8 pkt 
+Dopisałem struktury, obiekty oraz metody wirtualne, te wersje (ew. backup) wysłałem na moodla w niedziele wieczorem.
+Cały poniedziałek pisałem odśmiecanie i wysyłam ostateczną wersję z odśmiecaniem.
+Optymistycznie będę miał w sumie 3.8(front) + 7(podstawa) + 10(klasy) + 2(odśmiecanie) = 22.8 pkt 
 
 SRC
 W folderze src znajdują się pliki w których jest wiekszość logiki działania kompilatora.
