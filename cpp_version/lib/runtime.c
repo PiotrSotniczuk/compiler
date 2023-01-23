@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void _gcIncr(void* ptr);
+void __garbUp(void* ptr);
 
 void printString(char *s) {
     printf("%s\n", s);
@@ -26,8 +26,7 @@ char *readString(void) {
     if (len > 0 && line[len - 1] == '\n') {
         line[len - 1] = '\0';
     }
-    fprintf(stderr, "readStr--");
-    _gcIncr(line);
+    __garbUp(line);
     
     return line;
 }
@@ -54,46 +53,45 @@ char *__concat(char *A, char *B) {
     memcpy(A3, A, lenA);
     memcpy(A3 + lenA, B, lenB);
     A3[lenA + lenB] = '\0';
-     fprintf(stderr, "concat--");
-    _gcIncr(A3);
+    __garbUp(A3);
    
     return A3;
 }
 
-// all string s should be freeable
-char* _copyStr(char* s) {
-  int len = strlen(s) + 1;
-  char* res = (char*)malloc(len);
-  fprintf(stderr, "copy--");
-  _gcIncr(res);
+// all string s should be freeable now
+char* __allocString(char* str) {
+  int size = strlen(str) + 1;
+  char* new_str = (char*)malloc(size);
+  __garbUp(new_str);
   
-  strcpy(res, s);
-  return res;
+  strcpy(new_str, str);
+  return new_str;
 }
 
-struct gcCounter {
-  void* ptr;
-  int count;
-  struct gcCounter *next;
+// I will keep reference counters on List
+struct garbList {
+  int refs;
+  void* str_ptr;
+  struct garbList *next;
 };
 
-typedef struct gcCounter gcCounter;
+typedef struct garbList garbList;
 
-static gcCounter *gcFirst = NULL;
-static gcCounter *gcLast = NULL;
+static garbList *garbStart = NULL;
+static garbList *garbEnd = NULL;
 
-static gcCounter *_gcInit(void* ptr) {
-  gcCounter *res = (gcCounter *)malloc(sizeof(gcCounter));
-  res->ptr = ptr;
-  res->count = 1;
+static garbList *__garbInit(void* ptr) {
+  garbList *res = (garbList *)malloc(sizeof(garbList));
   res->next = NULL;
+  res->str_ptr = ptr;
+  res->refs = 1;
   return res;
 }
 
-static gcCounter *_gcFind(void* ptr) {
-  gcCounter *g = gcFirst;
+static garbList *__garbFind(void* ptr) {
+  garbList *g = garbStart;
   while (g != NULL) {
-    if (g->ptr == ptr) {
+    if (g->str_ptr == ptr) {
       return g;
     }
     g = g->next;
@@ -101,59 +99,74 @@ static gcCounter *_gcFind(void* ptr) {
   return NULL;
 }
 
-void _gcIncr(void* ptr) {
-  fprintf(stderr, "GC INCR: %d\n", (int)ptr);
-  if (gcFirst == NULL) {
-    gcFirst = gcLast = _gcInit(ptr);
+void __garbUp(void* ptr) {
+  if (garbStart == NULL) {
+    garbStart = __garbInit(ptr);
+    garbEnd = garbStart;
     return;
   }
-  gcCounter *g = _gcFind(ptr);
+  garbList *g = __garbFind(ptr);
   if (g == NULL) {
-    gcLast->next = _gcInit(ptr);
-    gcLast = gcLast->next;
+    garbEnd->next = __garbInit(ptr);
+    garbEnd = garbEnd->next;
     return;
   }
-  g->count++;
+  g->refs++;
 }
 
-void _gcDecr(void* ptr) {
-  fprintf(stderr, "GC DECR: %d\n", (int)ptr);
+void __garbDown(void* ptr) {
   if (ptr == NULL) return;
-  gcCounter *g = _gcFind(ptr);
+  garbList *g = __garbFind(ptr);
   if (g == NULL) {
     fprintf(stderr, "Trying to decr not found ptr = %d\n", (int)ptr);
     return;
   }
-  g->count--;
-  fprintf(stderr, "COUNT: %d\n", g->count);
-  if (g->count == 0) {
-    free(g->ptr);
-    gcCounter *next = g->next;
+  g->refs--;
+  fprintf(stderr, "COUNT: %d\n", g->refs);
+  // free 
+  if (g->refs == 0) {
+    free(g->str_ptr);
+    fprintf(stderr, "Freeing ptr = %d\n", (int)g->str_ptr);
+    garbList *next = g->next;
     free(g);
-    if (g == gcFirst) {
-      gcFirst = next;
+    // update list 
+    if (g == garbStart) {
+      garbStart = next;
       if (next == NULL) {
-        gcLast = NULL;
+        garbEnd = NULL;
       }
       return;
     }
-    gcCounter *p = gcFirst;
+    garbList *p = garbStart;
     while (p->next != g) {
       p = p->next;
     }
     p->next = next;
-    if (gcLast == g) {
-      gcLast = p;
+    if (garbEnd == g) {
+      garbEnd = p;
     }
   }
 }
 
-void _gcClean() {
-  gcCounter *g = gcFirst;
+// this will be run at the end of main 
+// this will destroy and free whole structure
+// if there are no mistakes in code than this should do anything
+void __garbPurge() {
+  garbList *g = garbStart;
   while (g != NULL) {
-    gcCounter *next = g->next;
-    free(g->ptr);
+    garbList *next = g->next;
+    free(g->str_ptr);
     free(g);
     g = next;
   }
+}
+
+void __printLen(){
+  int i = 0;
+  garbList *g = garbStart;
+  while(g != NULL){
+    i++;
+    g = g->next;
+  }
+  fprintf(stderr, "List is size = %d\n", i);
 }

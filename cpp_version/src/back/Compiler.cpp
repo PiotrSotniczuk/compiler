@@ -56,7 +56,7 @@ void Compiler::decr_env_str(map<string, pair<string, int>> env){
             int off = type_offs.second;
             this->act_code += add_t_n({
                 "push [ebp" + offset_str(off) + "]", 
-                "call _gcDecr",
+                "call __garbDown",
                 "add esp, 4"
             });
         }
@@ -176,7 +176,8 @@ void Compiler::visitRet(Ret *ret){
 
     if(this->act_fun == "main"){
         // return val on top
-        this->act_code += add_t_n({"call _gcClean"});
+        this->act_code += add_t_n({"call __printLen"});
+        this->act_code += add_t_n({"call __garbPurge"});
     }
     this->act_code += add_t_n({"pop eax", "leave", "ret"});
 }
@@ -233,9 +234,9 @@ void Compiler::visitEAdd(EAdd *e_add){
             "push edx",
             "push ecx",
 
-            "call _gcDecr", 
+            "call __garbDown", 
             "add esp, 4",
-            "call _gcDecr", 
+            "call __garbDown", 
             "add esp, 4"
         });
         return;
@@ -282,7 +283,7 @@ void Compiler::visitEString(EString *e_string){
     int index = this->local_const.find(e_string->string_)->second;
     this->act_code += add_t_n({
         "lea eax, .LC" + to_string(index), "push eax", 
-        "call _copyStr", "add esp, 4", "push eax"
+        "call __allocString", "add esp, 4", "push eax"
     });
     this->expr_type = "string";
 }
@@ -458,7 +459,7 @@ void Compiler::visitNoInit(NoInit *no_init){
         this->act_code += add_t_n({
             "lea eax, .LC_empty_str",
             "push eax",
-            "call _copyStr", 
+            "call __allocString", 
             "add esp, 4",
             "mov dword ptr [ebp" + to_string(offset) + "], eax"
         });
@@ -515,7 +516,7 @@ void Compiler::visitAss(Ass *ass){
         if(get<1>(var_val) == "string"){
             this->act_code += add_t_n({
                 "push dword ptr [ebp" + offset_str(get<2>(var_val)) + "]",
-                "call _gcDecr",
+                "call __garbDown",
                 "add esp, 4"
             });
         }
@@ -597,7 +598,7 @@ void Compiler::visitEVar(EVar *e_var){
         string typ = get<1>(in_vars);
         if(typ == "string"){
             this->act_code += add_t_n({
-                "call _gcIncr"
+                "call __garbUp"
             });
         }
         this->expr_type = typ;
@@ -690,7 +691,7 @@ void Compiler::visitSExp(SExp *s_exp){
     EString* strLit = dynamic_cast<EString*>(s_exp->expr_);
     if(strLit){
         this->act_code += add_t_n({
-            "call _gcDecr"
+            "call __garbDown"
         });
     }
 }
