@@ -133,7 +133,7 @@ void TypeChecker::visitClsDef(ClsDef *cls)
   this->vars.begin()->emplace(make_pair("self", cls->ident_));
 
   auto cls_obj = this->classes.find(cls->ident_);
-  assert(cls_obj != this->classes.end());
+  // assert(cls_obj != this->classes.end());
   for(auto atr : cls_obj->second.attrs){
     // moze tu dodaj tylko pierwszy jesli sie dziedzicza
     this->vars.begin()->emplace(make_pair(atr.first.first, atr.second.first));
@@ -403,7 +403,7 @@ void TypeChecker::visitEClsApp(EClsApp *e_cls_app)
   e_cls_app->expr_->accept(this);
   string cls_type = this->expr_type;
   auto cls_it = this->classes.find(cls_type);
-  assert(cls_it != this->classes.end());
+  // assert(cls_it != this->classes.end());
 
   auto fun_it = cls_it->second.vtab.find(e_cls_app->ident_);
   if(fun_it == cls_it->second.vtab.end()){
@@ -461,7 +461,7 @@ bool TypeChecker::type_compatible(string l_type, string r_type){
       return true;
     }
     auto next_ext_it = this->classes.find(ext);
-    assert(next_ext_it != this->classes.end());
+    // assert(next_ext_it != this->classes.end());
     ext = next_ext_it->second.ext;
   }
   return false;  

@@ -118,15 +118,12 @@ void __garbDown(void* ptr) {
   if (ptr == NULL) return;
   garbList *g = __garbFind(ptr);
   if (g == NULL) {
-    fprintf(stderr, "Trying to decr not found ptr = %d\n", (int)ptr);
     return;
   }
   g->refs--;
-  fprintf(stderr, "COUNT: %d\n", g->refs);
   // free 
   if (g->refs == 0) {
     free(g->str_ptr);
-    fprintf(stderr, "Freeing ptr = %d\n", (int)g->str_ptr);
     garbList *next = g->next;
     free(g);
     // update list 
@@ -137,6 +134,7 @@ void __garbDown(void* ptr) {
       }
       return;
     }
+    // g somewhere in the middle
     garbList *p = garbStart;
     while (p->next != g) {
       p = p->next;

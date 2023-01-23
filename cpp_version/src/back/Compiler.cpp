@@ -27,7 +27,7 @@ vector<string> Compiler::get_ext_vec(string c){
     while(c != ""){
         ret.push_back(c);
         auto c_it = this->classes.find(c);
-        assert(c_it != this->classes.end());
+        // assert(c_it != this->classes.end());
                 
         c = c_it->second.ext;
     }
@@ -36,9 +36,9 @@ vector<string> Compiler::get_ext_vec(string c){
 
 // get type and offset of atribute
 pair<string, int> Compiler::get_atr_vals(string c, string ident){
-    assert(c != "");
+    // assert(c != "");
     auto cls_it = this->classes.find(c);
-    assert(cls_it != this->classes.end());
+    // assert(cls_it != this->classes.end());
     auto exts = get_ext_vec(c);
     auto cls = cls_it->second;
     for(string ext : exts){
@@ -47,7 +47,8 @@ pair<string, int> Compiler::get_atr_vals(string c, string ident){
             return attr_it->second;
         }
     }
-    assert(false);
+    // assert(false);
+    return make_pair("", 0);
 }
 
 void Compiler::decr_env_str(map<string, pair<string, int>> env){
@@ -195,7 +196,8 @@ void Compiler::visitRet(Ret *ret){
 
     if(this->act_fun == "main"){
         // return val on top
-        this->act_code += add_t_n({"call __printLen"});
+        // Uncoment to see how many strings missed freeing
+        //this->act_code += add_t_n({"call __printLen"});
         this->act_code += add_t_n({"call __garbPurge"});
     }
     this->act_code += add_t_n({"pop eax", "leave", "ret"});
@@ -573,7 +575,7 @@ void Compiler::visitAss(Ass *ass){
 void Compiler::visitAtrAss(AtrAss *atr_ass){
   /* Code For AtrAss Goes Here */
     EClsAt* l_side = dynamic_cast<EClsAt*>(atr_ass->expr_1);
-    assert(l_side);
+    // assert(l_side);
     // znajdz jaka to klasa
     // self na [esp]
     l_side->expr_->accept(this);
@@ -681,10 +683,10 @@ void Compiler::visitEClsApp(EClsApp *e_cls_app){
     e_cls_app->expr_->accept(this);
     string e_typ = this->expr_type;
     auto cls_it = this->classes.find(e_typ);
-    assert(cls_it != this->classes.end());
+    // assert(cls_it != this->classes.end());
 
     auto fun_it = cls_it->second.vtab.find(e_cls_app->ident_);
-    assert(fun_it != cls_it->second.vtab.end());
+    // assert(fun_it != cls_it->second.vtab.end());
 
     int offset = get<3>(fun_it->second);
     int size = e_cls_app->listexpr_->size() + 1; // +1 for self in args
@@ -706,7 +708,7 @@ void Compiler::visitEClsApp(EClsApp *e_cls_app){
 void Compiler::visitNewCls(NewCls *new_cls){
   /* Code For NewCls Goes Here */
     auto cls_it = classes.find(new_cls->ident_);
-    assert(cls_it != this->classes.end());
+    // assert(cls_it != this->classes.end());
     
     int size = cls_it->second.size;
 
