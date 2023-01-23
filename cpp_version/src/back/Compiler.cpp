@@ -182,7 +182,18 @@ void Compiler::visitEAdd(EAdd *e_add){
     if(this->expr_type == "string"){
         this->act_code += add_t_n({
             "pop eax", "xchg eax, dword ptr [esp]", "push eax", 
-            "call __concat", "add esp, 8", "push eax"
+            "call __concat",
+            //put eax on stack below args
+            "pop ecx",
+            "pop edx",
+            "push eax",
+            "push edx",
+            "push ecx",
+
+            "call _gcDecr", 
+            "add esp, 4",
+            "call _gcDecr", 
+            "add esp, 4"
         });
         return;
     }
@@ -227,7 +238,8 @@ void Compiler::visitEString(EString *e_string){
     this->visitString(e_string->string_);
     int index = this->local_const.find(e_string->string_)->second;
     this->act_code += add_t_n({
-        "lea eax, .LC" + to_string(index), "push eax"
+        "lea eax, .LC" + to_string(index), "push eax", 
+        "call _copyStr", "add esp, 4", "push eax"
     });
     this->expr_type = "string";
 }
@@ -400,7 +412,10 @@ void Compiler::visitNoInit(NoInit *no_init){
     if(type == "string"){
         // init strings as ""
         this->act_code += add_t_n({
-            "mov eax, .LC_empty_str", 
+            "mov eax, .LC_empty_str",
+            "push eax",
+            "call _copyStr", 
+            "add esp, 4",
             "mov dword ptr [ebp" + to_string(offset) + "], eax"
         });
     }else{
@@ -422,6 +437,7 @@ void Compiler::visitInit(Init *init){
 
     this->vars_offsets.begin()->emplace(make_pair(init->ident_, make_pair(t, offset)));
 
+    // if string garb colec incr on var but decr of expr so zero
     this->act_code += add_t_n({
         "pop eax", "mov dword ptr [ebp" + to_string(offset) + ("], eax")
     });  
@@ -449,11 +465,23 @@ void Compiler::visitAss(Ass *ass){
     ass->expr_->accept(this);
     auto var_val = get_var(ass->ident_);
     if(get<0>(var_val) == true){
+        // garb coll we decr the expr but also incr on var so zero
+        // we have to decr old val
+        if(get<1>(var_val) == "string"){
+            this->act_code += add_t_n({
+                "push dword ptr [ebp" + offset_str(get<2>(var_val)) + "]",
+                "call _gcDecr",
+                "add esp, 4"
+            });
+        }
+
+        // normal
         this->act_code += add_t_n({
             "pop eax", "mov dword ptr [ebp" + offset_str(get<2>(var_val)) + ("], eax")
         }); 
         return;
     }
+
     auto atr_vals = get_atr_vals(this->act_class, ass->ident_);
     this->act_code += add_t_n({
         "pop eax",
@@ -521,7 +549,13 @@ void Compiler::visitEVar(EVar *e_var){
         this->act_code += add_t_n({
             "push [ebp" + offset_str(get<2>(in_vars)) + "]"
         });
-        this->expr_type = get<1>(in_vars);
+        string typ = get<1>(in_vars);
+        if(typ == "string"){
+            this->act_code += add_t_n({
+                "call _gcIncr"
+            });
+        }
+        this->expr_type = typ;
         return;
     }
     
@@ -603,4 +637,15 @@ void Compiler::visitENull(ENull *e_null){
         "push 0"
     });
     this->expr_type = this->last_type;
+}
+
+void Compiler::visitSExp(SExp *s_exp){
+    /* Code For SExp Goes Here */
+    s_exp->expr_->accept(this);
+    EString* strLit = dynamic_cast<EString*>(s_exp->expr_);
+    if(strLit){
+        this->act_code += add_t_n({
+            "call _gcDecr"
+        });
+    }
 }

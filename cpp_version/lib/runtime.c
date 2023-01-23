@@ -26,7 +26,9 @@ char *readString(void) {
     if (len > 0 && line[len - 1] == '\n') {
         line[len - 1] = '\0';
     }
+    fprintf(stderr, "readStr--");
     _gcIncr(line);
+    
     return line;
 }
 
@@ -52,8 +54,21 @@ char *__concat(char *A, char *B) {
     memcpy(A3, A, lenA);
     memcpy(A3 + lenA, B, lenB);
     A3[lenA + lenB] = '\0';
+     fprintf(stderr, "concat--");
     _gcIncr(A3);
+   
     return A3;
+}
+
+// all string s should be freeable
+char* _copyStr(char* s) {
+  int len = strlen(s) + 1;
+  char* res = (char*)malloc(len);
+  fprintf(stderr, "copy--");
+  _gcIncr(res);
+  
+  strcpy(res, s);
+  return res;
 }
 
 struct gcCounter {
@@ -99,6 +114,38 @@ void _gcIncr(void* ptr) {
     return;
   }
   g->count++;
+}
+
+void _gcDecr(void* ptr) {
+  fprintf(stderr, "GC DECR: %d\n", (int)ptr);
+  if (ptr == NULL) return;
+  gcCounter *g = _gcFind(ptr);
+  if (g == NULL) {
+    fprintf(stderr, "Trying to decr not found ptr = %d\n", (int)ptr);
+    return;
+  }
+  g->count--;
+  fprintf(stderr, "COUNT: %d\n", g->count);
+  if (g->count == 0) {
+    free(g->ptr);
+    gcCounter *next = g->next;
+    free(g);
+    if (g == gcFirst) {
+      gcFirst = next;
+      if (next == NULL) {
+        gcLast = NULL;
+      }
+      return;
+    }
+    gcCounter *p = gcFirst;
+    while (p->next != g) {
+      p = p->next;
+    }
+    p->next = next;
+    if (gcLast == g) {
+      gcLast = p;
+    }
+  }
 }
 
 void _gcClean() {

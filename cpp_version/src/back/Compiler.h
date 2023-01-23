@@ -81,7 +81,7 @@ class Compiler : public Skeleton {
         virtual void visitNewCls(NewCls *new_cls);
         virtual void visitENull(ENull *e_null);
         virtual void visitAtrAss(AtrAss *atr_ass);
-        // virtual void ;
+        virtual void visitSExp(SExp *s_exp);
         // virtual void ;
         // virtual void ;
 
