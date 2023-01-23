@@ -60,6 +60,7 @@ void Compiler::decr_env_str(map<string, pair<string, int>> env){
                 "add esp, 4"
             });
         }
+        // TODO remove string from attributes
     }
 }
 
@@ -561,6 +562,18 @@ void Compiler::visitAtrAss(AtrAss *atr_ass){
     string cls_typ = this->expr_type;
      
     auto atr_vals = get_atr_vals(cls_typ, l_side->ident_);
+
+    // if string down on old value
+    if(atr_vals.first == "string"){
+            // self on stack
+            this->act_code += add_t_n({
+            "pop eax", // self
+            "push eax", // copy of self
+            "push dword ptr [eax+" + to_string(atr_vals.second*4) + "]", // push string
+            "call __garbDown",
+            "add esp, 4" // back self on top
+        });
+    }
 
     atr_ass->expr_2->accept(this);
     this->act_code += add_t_n({
